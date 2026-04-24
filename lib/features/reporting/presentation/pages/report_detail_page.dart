@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/report_model.dart';
 import '../../data/report_providers.dart';
+import '../../data/mock_reporting_data.dart';
 
 class ReportDetailPage extends ConsumerStatefulWidget {
   final String reportId;
@@ -43,7 +44,7 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
 
     report = allReports.firstWhere(
       (r) => r.id == widget.reportId,
-      orElse: () => mockReports.first,
+      orElse: () => MockReportingData.mockCityFeed.first,
     );
     localUpvotes = report.upvotes;
     localPriority = report.priorityScore;

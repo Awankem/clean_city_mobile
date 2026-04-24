@@ -1,0 +1,265 @@
+import '../domain/report_model.dart';
+
+class MockReportingData {
+  static List<ReportModel> get mockCityFeed => [
+    ReportModel(
+      id: '101',
+      category: 'Overflowing Bin',
+      categoryIcon: 'delete_sweep',
+      categoryColor: '#81C784',
+      images: [
+        'https://images.unsplash.com/photo-1605600611284-19561ad7ddf0?q=80&w=800',
+        'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=800',
+      ],
+      description: 'The industrial bin at North Station has been overflowing for 3 days. It\'s attracting pests and smells terrible.',
+      location: 'North Station Avenue, Bamenda',
+      date: DateTime.now().subtract(const Duration(hours: 2)),
+      status: 'pending',
+      latitude: 5.9631,
+      longitude: 10.1591,
+      upvotes: 24,
+      priorityScore: 58,
+      statusHistory: [
+        StatusHistoryModel(
+          status: 'pending',
+          note: 'Report received and queued for review.',
+          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+        ),
+      ],
+    ),
+    ReportModel(
+      id: '102',
+      category: 'Illegal Dumping',
+      categoryIcon: 'warning_amber',
+      categoryColor: '#FFB74D',
+      images: [
+        'https://images.unsplash.com/photo-1595273670150-db0a3d39dbd3?q=80&w=800',
+      ],
+      description: 'Large pile of construction debris dumped behind the old council building. Includes broken glass and metal shards.',
+      location: 'Old Council Area, Commercial Avenue',
+      date: DateTime.now().subtract(const Duration(days: 1)),
+      status: 'in_progress',
+      latitude: 5.9599,
+      longitude: 10.1601,
+      upvotes: 15,
+      priorityScore: 42,
+      statusHistory: [
+        StatusHistoryModel(
+          status: 'pending',
+          note: 'Report registered.',
+          createdAt: DateTime.now().subtract(const Duration(days: 1, hours: 4)),
+        ),
+        StatusHistoryModel(
+          status: 'in_progress',
+          note: 'Sanitation team Alpha-1 has been dispatched to the site.',
+          createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        ),
+      ],
+    ),
+    ReportModel(
+      id: '103',
+      category: 'Clogged Drain',
+      categoryIcon: 'water_drop',
+      categoryColor: '#64B5F6',
+      images: [
+        'https://images.unsplash.com/photo-1541692641319-981cc79ee10a?q=80&w=800',
+      ],
+      description: 'Main drainage line is blocked by plastic waste. Water is starting to flood the sidewalk after the rain.',
+      location: 'Finance Junction Street',
+      date: DateTime.now().subtract(const Duration(hours: 8)),
+      status: 'pending',
+      latitude: 5.9610,
+      longitude: 10.1580,
+      upvotes: 31,
+      priorityScore: 75,
+      statusHistory: [
+        StatusHistoryModel(
+          status: 'pending',
+          note: 'Emergency maintenance ticket created.',
+          createdAt: DateTime.now().subtract(const Duration(hours: 8)),
+        ),
+      ],
+    ),
+    ReportModel(
+      id: '104',
+      category: 'Medical Waste',
+      categoryIcon: 'medical_services',
+      categoryColor: '#E57373',
+      images: [
+        'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800',
+      ],
+      description: 'Found several used syringes and bandages disposed of in a regular trash bag near the clinic.',
+      location: 'Hospital Road, Quarter 4',
+      date: DateTime.now().subtract(const Duration(days: 2)),
+      status: 'resolved',
+      latitude: 5.9650,
+      longitude: 10.1550,
+      upvotes: 45,
+      priorityScore: 120,
+      statusHistory: [
+        StatusHistoryModel(
+          status: 'pending',
+          note: 'High priority alert triggered.',
+          createdAt: DateTime.now().subtract(const Duration(days: 2, hours: 2)),
+        ),
+        StatusHistoryModel(
+          status: 'in_progress',
+          note: 'Biohazard containment team on site.',
+          createdAt: DateTime.now().subtract(const Duration(days: 2, hours: 1)),
+        ),
+        StatusHistoryModel(
+          status: 'resolved',
+          note: 'Waste safely removed and area decontaminated.',
+          createdAt: DateTime.now().subtract(const Duration(days: 2)),
+        ),
+      ],
+    ),
+    ReportModel(
+      id: '105',
+      category: 'Pothole',
+      categoryIcon: 'add_road',
+      categoryColor: '#90A4AE',
+      images: [
+        'https://images.unsplash.com/photo-1515162816999-a0af7ca7436b?q=80&w=800',
+      ],
+      description: 'Deep pothole forming in the middle of the road. Dangerous for motorcyclists at night.',
+      location: 'Nkwen Street, Mile 2',
+      date: DateTime.now().subtract(const Duration(days: 3)),
+      status: 'in_progress',
+      latitude: 5.9700,
+      longitude: 10.1700,
+      upvotes: 18,
+      priorityScore: 35,
+      statusHistory: [
+        StatusHistoryModel(
+          status: 'pending',
+          note: 'Infrastructure department notified.',
+          createdAt: DateTime.now().subtract(const Duration(days: 3, hours: 5)),
+        ),
+        StatusHistoryModel(
+          status: 'in_progress',
+          note: 'Surface leveling scheduled for later today.',
+          createdAt: DateTime.now().subtract(const Duration(days: 3)),
+        ),
+      ],
+    ),
+    ReportModel(
+      id: '106',
+      category: 'Littering',
+      categoryIcon: 'cleaning_services',
+      categoryColor: '#FFF176',
+      images: [
+        'https://images.unsplash.com/photo-1621451537084-482c73073a0f?q=80&w=800',
+      ],
+      description: 'Posters and flyers scattered across the park after the weekend event.',
+      location: 'Peace Park, Center',
+      date: DateTime.now().subtract(const Duration(hours: 12)),
+      status: 'pending',
+      latitude: 5.9580,
+      longitude: 10.1620,
+      upvotes: 7,
+      priorityScore: 12,
+      statusHistory: [
+        StatusHistoryModel(
+          status: 'pending',
+          note: 'Assigned to morning cleanup crew.',
+          createdAt: DateTime.now().subtract(const Duration(hours: 12)),
+        ),
+      ],
+    ),
+  ];
+
+  static List<ReportModel> get mockMyActivity => [
+    ReportModel(
+      id: '201',
+      category: 'Overflowing Bin',
+      categoryIcon: 'delete_sweep',
+      categoryColor: '#81C784',
+      images: [
+        'https://images.unsplash.com/photo-1605600611284-19561ad7ddf0?q=80&w=800',
+      ],
+      description: 'Bin near my office is completely full. People are starting to leave bags on the ground.',
+      location: 'Mankon, Station Hill',
+      date: DateTime.now().subtract(const Duration(hours: 1)),
+      status: 'pending',
+      latitude: 5.9620,
+      longitude: 10.1585,
+      upvotes: 5,
+      priorityScore: 15,
+      statusHistory: [
+        StatusHistoryModel(
+          status: 'pending',
+          note: 'Your report has been received. Thank you for contributing!',
+          createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+          changedBy: 'Awankem Benjamin',
+        ),
+      ],
+    ),
+    ReportModel(
+      id: '202',
+      category: 'Pothole',
+      categoryIcon: 'add_road',
+      categoryColor: '#90A4AE',
+      images: [
+        'https://images.unsplash.com/photo-1515162816999-a0af7ca7436b?q=80&w=800',
+      ],
+      description: 'Large pothole fixed! Great work by the city team.',
+      location: 'Mile 4 Road, Bamenda',
+      date: DateTime.now().subtract(const Duration(days: 4)),
+      status: 'resolved',
+      latitude: 5.9800,
+      longitude: 10.1800,
+      upvotes: 22,
+      priorityScore: 40,
+      statusHistory: [
+        StatusHistoryModel(
+          status: 'pending',
+          note: 'Report registered.',
+          createdAt: DateTime.now().subtract(const Duration(days: 7)),
+          changedBy: 'System',
+        ),
+        StatusHistoryModel(
+          status: 'in_progress',
+          note: 'Work crew dispatched.',
+          createdAt: DateTime.now().subtract(const Duration(days: 6)),
+          changedBy: 'Awankem Benjamin',
+        ),
+        StatusHistoryModel(
+          status: 'resolved',
+          note: 'Road repair completed. Area cleared.',
+          createdAt: DateTime.now().subtract(const Duration(days: 4)),
+          changedBy: 'Awankem Benjamin',
+        ),
+      ],
+    ),
+    ReportModel(
+      id: '203',
+      category: 'Graffiti',
+      categoryIcon: 'brush',
+      categoryColor: '#BA68C8',
+      images: [
+        'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800',
+      ],
+      description: 'Offensive graffiti on the community center wall.',
+      location: 'Community Center, Nkwen',
+      date: DateTime.now().subtract(const Duration(days: 1)),
+      status: 'in_progress',
+      latitude: 5.9720,
+      longitude: 10.1750,
+      upvotes: 9,
+      priorityScore: 25,
+      statusHistory: [
+        StatusHistoryModel(
+          status: 'pending',
+          note: 'Verified by moderator.',
+          createdAt: DateTime.now().subtract(const Duration(days: 1, hours: 6)),
+        ),
+        StatusHistoryModel(
+          status: 'in_progress',
+          note: 'Maintenance team scheduled for repainting.',
+          createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        ),
+      ],
+    ),
+  ];
+}

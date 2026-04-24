@@ -147,7 +147,10 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                     ),
                   ),
 
-                  if (reports.isNotEmpty) _buildLatestUpdateHighlight(reports.first),
+                  if (reports.isNotEmpty) ...[
+                    _buildLatestUpdateHighlight(reports.first),
+                    _buildFullTimelineCard(reports.first),
+                  ],
 
                   const Padding(
                     padding: EdgeInsets.fromLTRB(20, 12, 20, 16),
@@ -464,6 +467,113 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFullTimelineCard(ReportModel report) {
+    if (report.statusHistory.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+            color: AppColors.primary.withOpacity(0.1), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Status Timeline',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: report.statusHistory.length,
+            itemBuilder: (context, index) {
+              final history = report.statusHistory[index];
+              final isLast = index == report.statusHistory.length - 1;
+              
+              Color iconColor;
+              switch (history.status.toLowerCase()) {
+                case 'pending': iconColor = AppColors.statusPending; break;
+                case 'in_progress': iconColor = AppColors.statusInProgress; break;
+                case 'resolved': iconColor = AppColors.statusResolved; break;
+                default: iconColor = AppColors.outline;
+              }
+
+              IconData icon;
+              switch (history.status.toLowerCase()) {
+                case 'pending': icon = Icons.upload_file_outlined; break;
+                case 'in_progress': icon = Icons.verified_outlined; break;
+                case 'resolved': icon = Icons.check_circle_outline; break;
+                default: icon = Icons.info_outline;
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: iconColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(icon, color: iconColor, size: 18),
+                      ),
+                      if (!isLast)
+                        Container(
+                          width: 2,
+                          height: (history.changedBy != null && history.changedBy!.isNotEmpty) ? 80.0 : 50.0,
+                          color: AppColors.outlineVariantSolid,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(history.status.replaceAll('_', ' '),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: iconColor)),
+                          const SizedBox(height: 2),
+                          Text(DateFormat('MMM dd, HH:mm').format(history.createdAt),
+                              style: const TextStyle(
+                                  fontSize: 11, color: Color(0x80000000))),
+                          const SizedBox(height: 4),
+                          Text(history.note ?? 'No details provided.',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.onSurface.withOpacity(0.6),
+                                  height: 1.4)),
+                          if (history.changedBy != null && history.changedBy!.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            Text('Admin: ${history.changedBy}',
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primary)),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

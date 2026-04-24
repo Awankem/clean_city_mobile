@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/report_card.dart';
 import '../../domain/report_model.dart';
+import '../../data/mock_reporting_data.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -117,9 +118,9 @@ class HomePage extends StatelessWidget {
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: mockReports.length,
+                    itemCount: MockReportingData.mockCityFeed.length,
                     itemBuilder: (context, index) {
-                      final report = mockReports[index];
+                      final report = MockReportingData.mockCityFeed[index];
                       return Container(
                         width: 280,
                         margin: const EdgeInsets.only(right: 12),

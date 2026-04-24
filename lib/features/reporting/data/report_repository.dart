@@ -1,14 +1,24 @@
 import 'package:dio/dio.dart';
 import '../domain/report_model.dart';
 import '../../../core/network/dio_client.dart';
+import 'mock_reporting_data.dart';
 
 class ReportRepository {
   final Dio _dio;
+  
+  /// Toggle this to switch between Mock and Real API data
+  static const bool useMockData = true;
 
   ReportRepository(DioClient dioClient) : _dio = dioClient.dio;
 
   /// Fetch all reports for the city feed
   Future<List<ReportModel>> fetchReports() async {
+    if (useMockData) {
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 800));
+      return MockReportingData.mockCityFeed;
+    }
+    
     try {
       final response = await _dio.get('/reports');
       final List<dynamic> data = response.data;
@@ -20,6 +30,12 @@ class ReportRepository {
 
   /// Fetch reports submitted by current user
   Future<List<ReportModel>> fetchMyReports() async {
+    if (useMockData) {
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 600));
+      return MockReportingData.mockMyActivity;
+    }
+
     try {
       final response = await _dio.get('/my-reports');
       final List<dynamic> data = response.data;

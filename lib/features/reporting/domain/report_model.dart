@@ -29,6 +29,7 @@ class ReportModel {
   final List<String> images;
   final String description;
   final String location;
+  final String? locationName;
   final DateTime date;
   final String status;
   final double latitude;
@@ -45,6 +46,7 @@ class ReportModel {
     required this.images,
     required this.description,
     required this.location,
+    this.locationName,
     required this.date,
     required this.status,
     required this.latitude,

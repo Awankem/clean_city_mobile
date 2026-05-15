@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
 class ReportCard extends StatelessWidget {
+  final String id;
   final String category;
   final String date;
   final String status;
   final String location;
-  final List<String>? images; // Changed from imageUrl to images list
+  final List<String>? images;
   final int upvotes;
   final VoidCallback onTap;
 
   const ReportCard({
     super.key,
+    required this.id,
     required this.category,
     required this.date,
     required this.status,

@@ -29,9 +29,12 @@ class _RegisterPageState extends State<RegisterPage> {
         title: const Text('CleanCity', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
             // White header section
             Container(
               width: double.infinity,
@@ -69,7 +72,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Row(
+                  Wrap(
                     children: [
                       Text("Already a member? ",
                           style: TextStyle(fontSize: 13, color: AppColors.onSurface.withOpacity(0.6))),
@@ -177,6 +180,8 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
           ],
+            ),
+          ),
         ),
       ),
     );

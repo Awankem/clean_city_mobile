@@ -7,7 +7,7 @@ class ReportRepository {
   final Dio _dio;
   
   /// Toggle this to switch between Mock and Real API data
-  static const bool useMockData = true;
+  static const bool useMockData = false;
 
   ReportRepository(DioClient dioClient) : _dio = dioClient.dio;
 
@@ -37,7 +37,7 @@ class ReportRepository {
     }
 
     try {
-      final response = await _dio.get('/my-reports');
+      final response = await _dio.get('/reports/my'); // Corrected endpoint
       final List<dynamic> data = response.data;
       return data.map((json) => _mapJsonToReport(json)).toList();
     } catch (e) {
@@ -52,6 +52,7 @@ class ReportRepository {
     required double latitude,
     required double longitude,
     required List<String> imagePaths,
+    String? locationName,
   }) async {
     try {
       final List<MultipartFile> multiparts = [];
@@ -64,6 +65,7 @@ class ReportRepository {
         'description': description,
         'latitude': latitude,
         'longitude': longitude,
+        'location_name': locationName,
         'photos[]': multiparts,
       });
 
@@ -76,10 +78,21 @@ class ReportRepository {
 
   /// Map JSON from Laravel API to our Flutter ReportModel
   ReportModel _mapJsonToReport(Map<String, dynamic> json) {
-    // Extract images from related images table
+    // Extract images — prefer the full image_url the API now appends,
+    // fall back to building the URL from image_path manually.
+    const String storageBase = 'http://10.0.2.2:8000/storage/';
     final List<dynamic> imagesJson = json['images'] ?? [];
     final List<String> imageUrls = imagesJson
-        .map((img) => img['image_url'] as String) // Assuming your API returns full URLs
+        .map((img) {
+          // API now appends image_url; image_path is the fallback
+          final url  = img['image_url']  as String? ?? '';
+          final path = img['image_path'] as String? ?? '';
+          if (url.isNotEmpty)  return url;
+          if (path.startsWith('http')) return path;
+          if (path.isNotEmpty) return '$storageBase$path';
+          return '';
+        })
+        .where((u) => u.isNotEmpty)
         .toList();
 
     // Extract status history
@@ -98,7 +111,8 @@ class ReportRepository {
       categoryColor: categoryData['color'],
       images: imageUrls,
       description: json['description'] ?? '',
-      location: json['location_name'] ?? 'Unknown Location', // Laravel stores this
+      location: json['location_name'] ?? json['title'] ?? 'Unknown Location',
+      locationName: json['location_name'],
       date: DateTime.parse(json['created_at']),
       status: json['status'],
       latitude: double.parse(json['latitude'].toString()),

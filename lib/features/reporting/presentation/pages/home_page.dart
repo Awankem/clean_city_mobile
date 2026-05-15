@@ -125,6 +125,7 @@ class HomePage extends StatelessWidget {
                         width: 280,
                         margin: const EdgeInsets.only(right: 12),
                         child: ReportCard(
+                          id: report.id,
                           category: report.category,
                           date: DateFormat('MMM dd').format(report.date),
                           status: report.status,

@@ -27,9 +27,12 @@ class _LoginPageState extends State<LoginPage> {
         title: const Text('CleanCity', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
             // White title section below AppBar
             Container(
               width: double.infinity,
@@ -127,8 +130,8 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
                     children: [
                       Text("Don't have an account? ",
                           style: TextStyle(color: AppColors.onSurface.withOpacity(0.6))),
@@ -144,6 +147,8 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ],
+            ),
+          ),
         ),
       ),
     );

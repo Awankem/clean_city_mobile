@@ -1,32 +1,37 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../data/report_providers.dart';
 
-class SubmitReportPage extends StatefulWidget {
+class SubmitReportPage extends ConsumerStatefulWidget {
   const SubmitReportPage({super.key});
 
   @override
-  State<SubmitReportPage> createState() => _SubmitReportPageState();
+  ConsumerState<SubmitReportPage> createState() => _SubmitReportPageState();
 }
 
-class _SubmitReportPageState extends State<SubmitReportPage> {
+class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
   final List<File> _images = [];
   String _address = 'Detecting location...';
   String _coordinates = '';
+  double? _lat;
+  double? _lng;
+  bool _isSubmitting = false;
   final _descriptionController = TextEditingController();
   final _picker = ImagePicker();
   String? _selectedCategory;
 
-  final List<String> _categories = [
-    'Overflowing Bin',
-    'Illegal Dumping',
-    'Blocked Drainage',
-    'Uncollected Garbage',
-    'Other',
-  ];
+  final Map<String, int> _categoryMap = {
+    'Overflowing Bin': 1,
+    'Illegal Dumping': 2,
+    'Blocked Drainage': 3,
+    'Uncollected Garbage': 4,
+    'Other': 5,
+  };
 
   @override
   void initState() {
@@ -55,17 +60,67 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
 
       if (!mounted) return;
       setState(() {
-        _address = 'Commercial Avenue, Bamenda';
+        _lat = position.latitude;
+        _lng = position.longitude;
+        _address = 'Detected Location Area'; // Would ideally use geocoding here
         _coordinates =
             'Coordinates: ${position.latitude.toStringAsFixed(4)}° N, ${position.longitude.toStringAsFixed(4)}° E';
       });
     } catch (_) {
-      // Fallback for web / when GPS is unavailable
       if (!mounted) return;
       setState(() {
+        _lat = 5.9631;
+        _lng = 10.1591;
         _address = 'Commercial Avenue, Bamenda';
         _coordinates = 'Coordinates: 5.9631° N, 10.1591° E';
       });
+    }
+  }
+
+  Future<void> _handleSubmit() async {
+    if (_images.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please add at least one photo')),
+      );
+      return;
+    }
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a category')),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final repository = ref.read(reportRepositoryProvider);
+      await repository.submitReport(
+        categoryId: _categoryMap[_selectedCategory!] ?? 1,
+        description: _descriptionController.text,
+        latitude: _lat ?? 0.0,
+        longitude: _lng ?? 0.0,
+        locationName: _address,
+        imagePaths: _images.map((f) => f.path).toList(),
+      );
+
+      if (!mounted) return;
+      
+      // Invalidate providers to refresh data
+      ref.invalidate(cityReportsProvider);
+      ref.invalidate(myReportsProvider);
+
+      context.pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Report submitted successfully!')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to submit report: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
@@ -179,10 +234,13 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
           )
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             // Page Title area
             Container(
               width: double.infinity,
@@ -222,7 +280,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _sectionLabel('EVIDENCE PHOTOS (${_images.length}/5)'),
+                      Expanded(child: _sectionLabel('EVIDENCE PHOTOS (${_images.length}/5)')),
                       if (_images.length < 5)
                         TextButton.icon(
                           onPressed: _showImagePickerOptions,
@@ -424,7 +482,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
                           style: TextStyle(color: AppColors.outline)),
                       icon: const Icon(Icons.keyboard_arrow_down_rounded,
                           color: AppColors.onSurface),
-                      items: _categories.map((cat) {
+                      items: _categoryMap.keys.map((cat) {
                         return DropdownMenuItem(value: cat, child: Text(cat));
                       }).toList(),
                       onChanged: (val) => setState(() => _selectedCategory = val),
@@ -460,37 +518,22 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        if (_images.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please add at least one photo')),
-                          );
-                          return;
-                        }
-                        if (_selectedCategory == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please select a category')),
-                          );
-                          return;
-                        }
-                        context.pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Report submitted successfully!')),
-                        );
-                      },
+                      onPressed: _isSubmitting ? null : _handleSubmit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
+                        disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      icon: const Icon(Icons.send_rounded, size: 20),
-                      label: const Text(
-                        'Submit Report',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      icon: _isSubmitting 
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : const Icon(Icons.send_rounded, size: 20),
+                      label: Text(
+                        _isSubmitting ? 'Submitting...' : 'Submit Report',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -502,6 +545,8 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
           ],
         ),
       ),
+    ),
+    ),
     );
   }
 

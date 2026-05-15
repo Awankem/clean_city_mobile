@@ -136,11 +136,11 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            _buildStatPill('${reports.length}', 'Submitted', AppColors.primary),
+                            Expanded(child: _buildStatPill('${reports.length}', 'Submitted', AppColors.primary)),
                             const SizedBox(width: 8),
-                            _buildStatPill('$inProgressCount', 'In Progress', AppColors.statusInProgress),
+                            Expanded(child: _buildStatPill('$inProgressCount', 'In Progress', AppColors.statusInProgress)),
                             const SizedBox(width: 8),
-                            _buildStatPill('$resolvedCount', 'Resolved', AppColors.statusResolved),
+                            Expanded(child: _buildStatPill('$resolvedCount', 'Resolved', AppColors.statusResolved)),
                           ],
                         ),
                       ],
@@ -166,6 +166,7 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                     itemBuilder: (context, index) {
                       final report = reports[index];
                       return ReportCard(
+                        id: report.id,
                         category: report.category,
                         date: DateFormat('MMM dd, yyyy').format(report.date),
                         status: report.status,
@@ -275,6 +276,7 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                     itemBuilder: (context, index) {
                       final report = filteredReports[index];
                       return ReportCard(
+                        id: report.id,
                         category: report.category,
                         date: DateFormat('MMM dd, yyyy').format(report.date),
                         status: report.status,
@@ -451,8 +453,11 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(title,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      Expanded(
+                        child: Text(title,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            overflow: TextOverflow.ellipsis),
+                      ),
                       Text(time,
                           style: const TextStyle(
                               fontSize: 11, color: Color(0x80000000))),

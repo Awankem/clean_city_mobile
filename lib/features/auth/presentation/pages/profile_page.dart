@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../reporting/data/report_providers.dart';
+import '../../data/auth_providers.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -12,6 +13,9 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final myReportsAsync = ref.watch(myReportsProvider);
     final reportsCount = myReportsAsync.asData?.value.length ?? 0;
+    
+    final userAsync = ref.watch(userProvider);
+
     
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLow,
@@ -40,54 +44,70 @@ class ProfilePage extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
                   child: Row(
                     children: [
-                      Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [AppColors.primary, AppColors.primaryContainer],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        child: const Center(
-                          child: Text('JA',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold)),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Jean-Luc Ambassa',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                            Text('jl.ambassa@civic.cm',
-                                style: TextStyle(
-                                    fontSize: 13, color: AppColors.onSurface.withOpacity(0.55))),
-                            const SizedBox(height: 8),
-                            Container(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Text(
-                                'TOP 5% CONTRIBUTOR',
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5),
-                              ),
+                      userAsync.when(
+                        loading: () => const Expanded(child: Center(child: CircularProgressIndicator())),
+                        error: (err, stack) => Expanded(child: Text('Failed to load profile')),
+                        data: (user) {
+                          final name = user['name'] ?? 'Citizen';
+                          final email = user['email'] ?? '';
+                          final initials = name.isNotEmpty ? name.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase() : 'CC';
+                          
+                          return Expanded(
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 72,
+                                  height: 72,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      colors: [AppColors.primary, AppColors.primaryContainer],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(initials,
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(name,
+                                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                      Text(email,
+                                          style: TextStyle(
+                                              fontSize: 13, color: AppColors.onSurface.withOpacity(0.55))),
+                                      const SizedBox(height: 8),
+                                      Container(
+                                        padding:
+                                            const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Text(
+                                          'CITIZEN',
+                                          style: TextStyle(
+                                              color: AppColors.primary,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0.5),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -194,7 +214,12 @@ class ProfilePage extends ConsumerWidget {
                     width: double.infinity,
                     height: 52,
                     child: OutlinedButton.icon(
-                      onPressed: () => context.go('/welcome'),
+                      onPressed: () async {
+                        await ref.read(authRepositoryProvider).logout();
+                        if (context.mounted) {
+                          context.go('/welcome');
+                        }
+                      },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.tertiary,
                         side: BorderSide(color: AppColors.tertiary.withOpacity(0.4)),

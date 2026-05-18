@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/error_handler.dart';
 import '../../data/report_providers.dart';
 
 class SubmitReportPage extends ConsumerStatefulWidget {
@@ -23,15 +24,7 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
   bool _isSubmitting = false;
   final _descriptionController = TextEditingController();
   final _picker = ImagePicker();
-  String? _selectedCategory;
-
-  final Map<String, int> _categoryMap = {
-    'Overflowing Bin': 1,
-    'Illegal Dumping': 2,
-    'Blocked Drainage': 3,
-    'Uncollected Garbage': 4,
-    'Other': 5,
-  };
+  int? _selectedCategoryId;
 
   @override
   void initState() {
@@ -84,7 +77,7 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
       );
       return;
     }
-    if (_selectedCategory == null) {
+    if (_selectedCategoryId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a category')),
       );
@@ -96,7 +89,7 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
     try {
       final repository = ref.read(reportRepositoryProvider);
       await repository.submitReport(
-        categoryId: _categoryMap[_selectedCategory!] ?? 1,
+        categoryId: _selectedCategoryId!,
         description: _descriptionController.text,
         latitude: _lat ?? 0.0,
         longitude: _lng ?? 0.0,
@@ -116,9 +109,7 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to submit report: ${e.toString()}')),
-      );
+      ErrorHandler.showErrorPopup(context, e);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -207,6 +198,8 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
 
   @override
   Widget build(BuildContext context) {
+    final categoriesAsync = ref.watch(categoriesProvider);
+
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLow,
       appBar: AppBar(
@@ -471,21 +464,36 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedCategory,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    child: categoriesAsync.when(
+                      loading: () => const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(child: CircularProgressIndicator()),
                       ),
-                      hint: const Text('Select Category',
-                          style: TextStyle(color: AppColors.outline)),
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                          color: AppColors.onSurface),
-                      items: _categoryMap.keys.map((cat) {
-                        return DropdownMenuItem(value: cat, child: Text(cat));
-                      }).toList(),
-                      onChanged: (val) => setState(() => _selectedCategory = val),
+                      error: (err, stack) => const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text('Failed to load categories', style: TextStyle(color: Colors.red)),
+                      ),
+                      data: (categories) {
+                        return DropdownButtonFormField<int>(
+                          value: _selectedCategoryId,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          ),
+                          hint: const Text('Select Category',
+                              style: TextStyle(color: AppColors.outline)),
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                              color: AppColors.onSurface),
+                          items: categories.map<DropdownMenuItem<int>>((cat) {
+                            return DropdownMenuItem<int>(
+                              value: cat['id'] as int,
+                              child: Text(cat['name'] as String),
+                            );
+                          }).toList(),
+                          onChanged: (val) => setState(() => _selectedCategoryId = val),
+                        );
+                      },
                     ),
                   ),
 

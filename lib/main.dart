@@ -4,6 +4,7 @@ import 'core/theme/app_theme.dart';
 import 'core/navigation/router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/services/notification_service.dart';
 
 void main() async {
@@ -18,17 +19,23 @@ void main() async {
     debugPrint('⚠️ Firebase init failed: $e — continuing without notifications.');
   }
 
+  // Check if user is already logged in
+  final prefs = await SharedPreferences.getInstance();
+  final hasToken = prefs.getString('auth_token') != null;
+
   runApp(
-    const ProviderScope(
+    ProviderScope(
       child: OverlaySupport.global(
-        child: CleanCityApp(),
+        child: CleanCityApp(isAuthenticated: hasToken),
       ),
     ),
   );
 }
 
 class CleanCityApp extends StatelessWidget {
-  const CleanCityApp({super.key});
+  final bool isAuthenticated;
+  
+  const CleanCityApp({super.key, required this.isAuthenticated});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +43,7 @@ class CleanCityApp extends StatelessWidget {
       title: 'CleanCity',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      routerConfig: AppRouter.router,
+      routerConfig: AppRouter.createRouter(isAuthenticated),
     );
   }
 }

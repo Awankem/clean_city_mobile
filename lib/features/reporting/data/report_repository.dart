@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../domain/report_model.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/constants/api_constants.dart';
 import 'mock_reporting_data.dart';
 
 class ReportRepository {
@@ -20,7 +21,7 @@ class ReportRepository {
     }
     
     try {
-      final response = await _dio.get('/reports');
+      final response = await _dio.get(ApiConstants.reports);
       final List<dynamic> data = response.data;
       return data.map((json) => _mapJsonToReport(json)).toList();
     } catch (e) {
@@ -37,7 +38,7 @@ class ReportRepository {
     }
 
     try {
-      final response = await _dio.get('/reports/my'); // Corrected endpoint
+      final response = await _dio.get(ApiConstants.myReports);
       final List<dynamic> data = response.data;
       return data.map((json) => _mapJsonToReport(json)).toList();
     } catch (e) {
@@ -69,8 +70,28 @@ class ReportRepository {
         'photos[]': multiparts,
       });
 
-      final response = await _dio.post('/reports', data: formData);
+      final response = await _dio.post(ApiConstants.reports, data: formData);
       return _mapJsonToReport(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Upvote a report
+  Future<void> upvote(String reportId) async {
+    try {
+      final url = ApiConstants.reportVotes.replaceAll('{id}', reportId);
+      await _dio.post(url);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Fetch available categories
+  Future<List<dynamic>> fetchCategories() async {
+    try {
+      final response = await _dio.get(ApiConstants.categories);
+      return response.data as List<dynamic>;
     } catch (e) {
       rethrow;
     }
@@ -80,7 +101,7 @@ class ReportRepository {
   ReportModel _mapJsonToReport(Map<String, dynamic> json) {
     // Extract images — prefer the full image_url the API now appends,
     // fall back to building the URL from image_path manually.
-    const String storageBase = 'http://10.0.2.2:8000/storage/';
+    const String storageBase = 'https://cleancity-api.onrender.com/storage/';
     final List<dynamic> imagesJson = json['images'] ?? [];
     final List<String> imageUrls = imagesJson
         .map((img) {

@@ -18,10 +18,11 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 class AppRouter {
-  static final router = GoRouter(
-    navigatorKey: _rootNavigatorKey,
-    initialLocation: '/welcome',
-    routes: [
+  static GoRouter createRouter(bool isAuthenticated) {
+    return GoRouter(
+      navigatorKey: _rootNavigatorKey,
+      initialLocation: isAuthenticated ? '/' : '/welcome',
+      routes: [
       // ── Public / Auth routes ────────────────────────────────────────────
       GoRoute(
         path: '/welcome',
@@ -89,4 +90,5 @@ class AppRouter {
       ),
     ],
   );
+  }
 }

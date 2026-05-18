@@ -25,3 +25,9 @@ final myReportsProvider = FutureProvider<List<ReportModel>>((ref) async {
   final repository = ref.watch(reportRepositoryProvider);
   return repository.fetchMyReports();
 });
+
+/// Provider for the report categories
+final categoriesProvider = FutureProvider<List<dynamic>>((ref) async {
+  final repository = ref.watch(reportRepositoryProvider);
+  return repository.fetchCategories();
+});

@@ -3,7 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 class MapboxService {
-  static const String _accessToken = String.fromEnvironment('MAPBOX_ACCESS_TOKEN');
+  static const String _accessToken = String.fromEnvironment(
+    'MAPBOX_ACCESS_TOKEN',
+    defaultValue: 'pk.eyJ1IjoiYW55ZXByaW5jZSIsImEiOiJjbWQ0MTBscWEwOTliMmpxdTZhb3BuOXlsIn0.FPnDcOTWE3Q8SfnKEXCPpA',
+  );
   static const String _baseUrl = 'https://api.mapbox.com';
 
   static String getTileLayerUrl() {

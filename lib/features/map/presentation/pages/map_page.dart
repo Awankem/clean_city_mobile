@@ -105,6 +105,7 @@ class _MapPageState extends ConsumerState<MapPage> {
               children: [
                 TileLayer(
                   urlTemplate: MapboxService.getTileLayerUrl(),
+                  tileProvider: NetworkTileProvider(),
                   userAgentPackageName: 'com.clean.city',
                 ),
                 if (_currentLocation != null)

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../data/auth_providers.dart';
+import '../../../../core/services/notification_service.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -37,6 +38,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     try {
       await ref.read(authRepositoryProvider).register(name, email, phone, password);
+      await NotificationService.uploadFcmToken();
       if (mounted) {
         context.go('/'); // Navigate to dashboard on success
       }

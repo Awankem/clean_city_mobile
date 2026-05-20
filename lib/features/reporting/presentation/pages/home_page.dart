@@ -1,17 +1,20 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/report_card.dart';
 import '../../domain/report_model.dart';
-import '../../data/mock_reporting_data.dart';
+import '../../data/report_providers.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reportsAsync = ref.watch(cityReportsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLow,
       body: CustomScrollView(
@@ -56,7 +59,7 @@ class HomePage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Text(
-                              'BAMENDA DISTRICT',
+                              'CITY OVERVIEW',
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
@@ -68,14 +71,40 @@ class HomePage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        '124',
-                        style: TextStyle(
-                          fontSize: 56,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                          letterSpacing: -2,
-                          height: 1,
+                      reportsAsync.when(
+                        data: (reports) {
+                          final resolvedCount = reports.where((r) => r.status.toLowerCase() == 'resolved').length;
+                          return Text(
+                            '$resolvedCount',
+                            style: const TextStyle(
+                              fontSize: 56,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                              letterSpacing: -2,
+                              height: 1,
+                            ),
+                          );
+                        },
+                        loading: () => const SizedBox(
+                          height: 56,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                            ),
+                          ),
+                        ),
+                        error: (_, __) => const Text(
+                          '0',
+                          style: TextStyle(
+                            fontSize: 56,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                            letterSpacing: -2,
+                            height: 1,
+                          ),
                         ),
                       ),
                       Text(
@@ -115,70 +144,116 @@ class HomePage extends StatelessWidget {
                 // Scrollable report cards
                 SizedBox(
                   height: 200,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: MockReportingData.mockCityFeed.length,
-                    itemBuilder: (context, index) {
-                      final report = MockReportingData.mockCityFeed[index];
-                      return Container(
-                        width: 280,
-                        margin: const EdgeInsets.only(right: 12),
-                        child: ReportCard(
-                          id: report.id,
-                          category: report.category,
-                          date: DateFormat('MMM dd').format(report.date),
-                          status: report.status,
-                          location: report.location,
-                          upvotes: report.upvotes,
-                          onTap: () => context.push('/report-detail/${report.id}'),
-                        ),
+                  child: reportsAsync.when(
+                    data: (reports) {
+                      final activeReports = reports.where((r) => r.status.toLowerCase() != 'resolved').toList();
+                      if (activeReports.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No active reports currently.',
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                          ),
+                        );
+                      }
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: activeReports.length > 5 ? 5 : activeReports.length,
+                        itemBuilder: (context, index) {
+                          final report = activeReports[index];
+                          return Container(
+                            width: 280,
+                            margin: const EdgeInsets.only(right: 12),
+                            child: ReportCard(
+                              id: report.id,
+                              category: report.category,
+                              date: DateFormat('MMM dd').format(report.date),
+                              status: report.status,
+                              location: report.location,
+                              upvotes: report.upvotes,
+                              onTap: () => context.push('/report-detail/${report.id}'),
+                            ),
+                          );
+                        },
                       );
                     },
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(color: AppColors.primary),
+                    ),
+                    error: (err, _) => Center(
+                      child: Text(
+                        'Error: $err',
+                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                      ),
+                    ),
                   ),
                 ),
 
                 const SizedBox(height: 28),
 
-                // Live Hotspots
+                // High Priority Issues
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: const Text(
-                    'Live Hotspots',
+                    'High Priority Issues',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 12),
 
-                _buildHotspot(
-                  context,
-                  icon: Icons.warning_amber_rounded,
-                  iconBg: const Color(0xFFFFDAD7),
-                  iconColor: AppColors.tertiary,
-                  title: 'Commercial Avenue, Bamenda',
-                  subtitle: '3 active reports · High Priority',
-                  badge: 'URGENT',
-                  badgeColor: AppColors.tertiary,
-                ),
-                _buildHotspot(
-                  context,
-                  icon: Icons.recycling_rounded,
-                  iconBg: AppColors.statusInProgress.withOpacity(0.12),
-                  iconColor: AppColors.statusInProgress,
-                  title: 'Food Market Road, Bamenda',
-                  subtitle: '2 active reports · Medium Priority',
-                  badge: 'IN PROGRESS',
-                  badgeColor: AppColors.statusInProgress,
-                ),
-                _buildHotspot(
-                  context,
-                  icon: Icons.water_damage_outlined,
-                  iconBg: AppColors.statusPending.withOpacity(0.1),
-                  iconColor: AppColors.statusPending,
-                  title: 'Nkwen District',
-                  subtitle: '1 report · Under review',
-                  badge: 'REPORTED',
-                  badgeColor: AppColors.statusPending,
+                reportsAsync.when(
+                  data: (reports) {
+                    final highPriorityReports = reports
+                        .where((r) => r.status.toLowerCase() != 'resolved')
+                        .toList()
+                      ..sort((a, b) => b.priorityScore.compareTo(a.priorityScore));
+
+                    if (highPriorityReports.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        child: Text(
+                          'No active priority issues reported.',
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                      );
+                    }
+
+                    final displayCount = highPriorityReports.length > 3 ? 3 : highPriorityReports.length;
+                    return Column(
+                      children: List.generate(displayCount, (index) {
+                        final report = highPriorityReports[index];
+                        
+                        // Map status to badge
+                        String badge = 'REPORTED';
+                        Color badgeColor = AppColors.statusPending;
+                        if (report.status.toLowerCase() == 'in_progress') {
+                          badge = 'IN PROGRESS';
+                          badgeColor = AppColors.statusInProgress;
+                        }
+
+                        return GestureDetector(
+                          onTap: () => context.push('/report-detail/${report.id}'),
+                          child: _buildHotspot(
+                            context,
+                            icon: _getCategoryIcon(report.categoryIcon),
+                            iconBg: badgeColor.withOpacity(0.12),
+                            iconColor: badgeColor,
+                            title: report.location,
+                            subtitle: '${report.category} · Priority Score: ${report.priorityScore}',
+                            badge: badge,
+                            badgeColor: badgeColor,
+                          ),
+                        );
+                      }),
+                    );
+                  },
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: CircularProgressIndicator(color: AppColors.primary),
+                    ),
+                  ),
+                  error: (_, __) => const SizedBox.shrink(),
                 ),
 
                 const SizedBox(height: 100),
@@ -248,5 +323,18 @@ class HomePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  IconData _getCategoryIcon(String? iconName) {
+    if (iconName != null) {
+      switch (iconName) {
+        case 'delete_outline': return Icons.delete_outline;
+        case 'water_damage': return Icons.water_damage;
+        case 'warning_amber': return Icons.warning_amber;
+        case 'delete_sweep': return Icons.delete_sweep;
+        case 'more_horiz': return Icons.more_horiz;
+      }
+    }
+    return Icons.eco_outlined;
   }
 }

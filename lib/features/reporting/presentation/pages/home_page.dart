@@ -32,11 +32,13 @@ class HomePage extends ConsumerWidget {
             elevation: 0,
             title: const Text(
               'CleanCity',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
             ),
-            actions: const [
-              NotificationIconButton(),
-            ],
+            actions: const [NotificationIconButton()],
           ),
 
           SliverToBoxAdapter(
@@ -54,7 +56,10 @@ class HomePage extends ConsumerWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
@@ -74,8 +79,11 @@ class HomePage extends ConsumerWidget {
                       const SizedBox(height: 16),
                       myReportsAsync.when(
                         data: (reports) {
-                          final resolvedCount =
-                              reports.where((r) => r.status.toLowerCase() == 'resolved').length;
+                          final resolvedCount = reports
+                              .where(
+                                (r) => r.status.toLowerCase() == 'resolved',
+                              )
+                              .length;
                           return Text(
                             '$resolvedCount',
                             style: const TextStyle(
@@ -94,7 +102,10 @@ class HomePage extends ConsumerWidget {
                             child: SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
+                              ),
                             ),
                           ),
                         ),
@@ -110,7 +121,7 @@ class HomePage extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        'Reports you\'ve resolved.',
+                        'Reports of your reports resolved.',
                         style: TextStyle(
                           fontSize: 16,
                           color: AppColors.onSurface.withOpacity(0.65),
@@ -128,12 +139,15 @@ class HomePage extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: myReportsAsync.when(
                     data: (reports) {
-                      final pending =
-                          reports.where((r) => r.status.toLowerCase() == 'pending').length;
-                      final inProgress =
-                          reports.where((r) => r.status.toLowerCase() == 'in_progress').length;
-                      final resolved =
-                          reports.where((r) => r.status.toLowerCase() == 'resolved').length;
+                      final pending = reports
+                          .where((r) => r.status.toLowerCase() == 'pending')
+                          .length;
+                      final inProgress = reports
+                          .where((r) => r.status.toLowerCase() == 'in_progress')
+                          .length;
+                      final resolved = reports
+                          .where((r) => r.status.toLowerCase() == 'resolved')
+                          .length;
                       return GridView.count(
                         crossAxisCount: 2,
                         shrinkWrap: true,
@@ -172,7 +186,11 @@ class HomePage extends ConsumerWidget {
                     },
                     loading: () => const SizedBox(
                       height: 120,
-                      child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      ),
                     ),
                     error: (_, __) => const SizedBox.shrink(),
                   ),
@@ -188,12 +206,20 @@ class HomePage extends ConsumerWidget {
                     children: [
                       const Text(
                         'Your Recent Reports',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       TextButton(
                         onPressed: () => context.go('/reports'),
-                        child: const Text('View All',
-                            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          'View All',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -205,7 +231,8 @@ class HomePage extends ConsumerWidget {
                   height: 228,
                   child: myReportsAsync.when(
                     data: (reports) {
-                      final sorted = [...reports]..sort((a, b) => b.date.compareTo(a.date));
+                      final sorted = [...reports]
+                        ..sort((a, b) => b.date.compareTo(a.date));
                       final recentReports = sorted.take(5).toList();
                       if (recentReports.isEmpty) {
                         return const Center(
@@ -233,14 +260,17 @@ class HomePage extends ConsumerWidget {
                               location: report.location,
                               images: report.images,
                               upvotes: report.upvotes,
-                              onTap: () => context.push('/report-detail/${report.id}'),
+                              onTap: () =>
+                                  context.push('/report-detail/${report.id}'),
                             ),
                           );
                         },
                       );
                     },
                     loading: () => const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
                     ),
                     error: (err, _) => Center(
                       child: Text(
@@ -265,14 +295,21 @@ class HomePage extends ConsumerWidget {
 
                 cityReportsAsync.when(
                   data: (reports) {
-                    final highPriorityReports = reports
-                        .where((r) => r.status.toLowerCase() != 'resolved')
-                        .toList()
-                      ..sort((a, b) => b.priorityScore.compareTo(a.priorityScore));
+                    final highPriorityReports =
+                        reports
+                            .where((r) => r.status.toLowerCase() != 'resolved')
+                            .toList()
+                          ..sort(
+                            (a, b) =>
+                                b.priorityScore.compareTo(a.priorityScore),
+                          );
 
                     if (highPriorityReports.isEmpty) {
                       return const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
                         child: Text(
                           'No active priority issues in the city.',
                           style: TextStyle(color: Colors.grey, fontSize: 14),
@@ -280,24 +317,36 @@ class HomePage extends ConsumerWidget {
                       );
                     }
 
-                    final displayCount = highPriorityReports.length > 3 ? 3 : highPriorityReports.length;
+                    final displayCount = highPriorityReports.length > 3
+                        ? 3
+                        : highPriorityReports.length;
                     return Column(
                       children: List.generate(displayCount, (index) {
                         final report = highPriorityReports[index];
-                        
-                        final badge = ReportStatusUtils.badgeLabel(report.status);
-                        final badgeColor = ReportStatusUtils.badgeBackground(report.status);
-                        final badgeTextColor = ReportStatusUtils.color(report.status);
+
+                        final badge = ReportStatusUtils.badgeLabel(
+                          report.status,
+                        );
+                        final badgeColor = ReportStatusUtils.badgeBackground(
+                          report.status,
+                        );
+                        final badgeTextColor = ReportStatusUtils.color(
+                          report.status,
+                        );
 
                         return GestureDetector(
-                          onTap: () => context.push('/report-detail/${report.id}'),
+                          onTap: () =>
+                              context.push('/report-detail/${report.id}'),
                           child: _buildHotspot(
                             context,
                             icon: _getCategoryIcon(report.categoryIcon),
                             iconBg: badgeColor.withOpacity(0.12),
-                            iconColor: badgeTextColor == Colors.white ? badgeColor : badgeTextColor,
+                            iconColor: badgeTextColor == Colors.white
+                                ? badgeColor
+                                : badgeTextColor,
                             title: report.location,
-                            subtitle: '${report.category} · Priority Score: ${report.priorityScore}',
+                            subtitle:
+                                '${report.category} · Priority Score: ${report.priorityScore}',
                             badge: badge,
                             badgeColor: badgeColor,
                             badgeTextColor: badgeTextColor,
@@ -309,7 +358,9 @@ class HomePage extends ConsumerWidget {
                   loading: () => const Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 20),
-                      child: CircularProgressIndicator(color: AppColors.primary),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                   error: (_, __) => const SizedBox.shrink(),
@@ -327,8 +378,14 @@ class HomePage extends ConsumerWidget {
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         icon: const Icon(Icons.add_a_photo_outlined, color: Colors.white),
-        label: const Text('Report Issue',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+        label: const Text(
+          'Report Issue',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+          ),
+        ),
       ),
     );
   }
@@ -356,7 +413,10 @@ class HomePage extends ConsumerWidget {
           Container(
             width: 48,
             height: 48,
-            decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(14),
+            ),
             child: Icon(icon, color: iconColor, size: 24),
           ),
           const SizedBox(width: 14),
@@ -364,9 +424,20 @@ class HomePage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                Text(subtitle,
-                    style: TextStyle(fontSize: 12, color: AppColors.onSurface.withOpacity(0.55))),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.onSurface.withOpacity(0.55),
+                  ),
+                ),
               ],
             ),
           ),
@@ -376,9 +447,15 @@ class HomePage extends ConsumerWidget {
               color: badgeColor,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(badge,
-                style: TextStyle(
-                    color: badgeTextColor, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+            child: Text(
+              badge,
+              style: TextStyle(
+                color: badgeTextColor,
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
           ),
         ],
       ),
@@ -388,11 +465,16 @@ class HomePage extends ConsumerWidget {
   IconData _getCategoryIcon(String? iconName) {
     if (iconName != null) {
       switch (iconName) {
-        case 'delete_outline': return Icons.delete_outline;
-        case 'water_damage': return Icons.water_damage;
-        case 'warning_amber': return Icons.warning_amber;
-        case 'delete_sweep': return Icons.delete_sweep;
-        case 'more_horiz': return Icons.more_horiz;
+        case 'delete_outline':
+          return Icons.delete_outline;
+        case 'water_damage':
+          return Icons.water_damage;
+        case 'warning_amber':
+          return Icons.warning_amber;
+        case 'delete_sweep':
+          return Icons.delete_sweep;
+        case 'more_horiz':
+          return Icons.more_horiz;
       }
     }
     return Icons.eco_outlined;

@@ -32,10 +32,28 @@ void main() async {
   );
 }
 
-class CleanCityApp extends StatelessWidget {
+class CleanCityApp extends StatefulWidget {
   final bool isAuthenticated;
-  
+
   const CleanCityApp({super.key, required this.isAuthenticated});
+
+  @override
+  State<CleanCityApp> createState() => _CleanCityAppState();
+}
+
+class _CleanCityAppState extends State<CleanCityApp> {
+  late final AppRouterHolder _routerHolder;
+
+  @override
+  void initState() {
+    super.initState();
+    _routerHolder = AppRouterHolder(isAuthenticated: widget.isAuthenticated);
+    NotificationService.onReportTap = (reportId) {
+      if (reportId != null) {
+        _routerHolder.router.push('/report-detail/$reportId');
+      }
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +61,7 @@ class CleanCityApp extends StatelessWidget {
       title: 'CleanCity',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      routerConfig: AppRouter.createRouter(isAuthenticated),
+      routerConfig: _routerHolder.router,
     );
   }
 }

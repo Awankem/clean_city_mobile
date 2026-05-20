@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/notification_icon_button.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../reporting/data/report_providers.dart';
@@ -27,11 +28,8 @@ class ProfilePage extends ConsumerWidget {
             elevation: 0,
             title: const Text('CleanCity',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none_outlined, color: Colors.white),
-                onPressed: () => context.push('/notifications'),
-              ),
+            actions: const [
+              NotificationIconButton(),
             ],
           ),
           SliverToBoxAdapter(

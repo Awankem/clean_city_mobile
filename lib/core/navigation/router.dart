@@ -17,6 +17,13 @@ import '../../features/notifications/presentation/pages/notifications_page.dart'
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
 
+class AppRouterHolder {
+  final GoRouter router;
+
+  AppRouterHolder({required bool isAuthenticated})
+      : router = AppRouter.createRouter(isAuthenticated);
+}
+
 class AppRouter {
   static GoRouter createRouter(bool isAuthenticated) {
     return GoRouter(

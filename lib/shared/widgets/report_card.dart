@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import 'status_badge.dart';
+import '../../core/utils/report_format_utils.dart';
 
 class ReportCard extends StatelessWidget {
   final String id;
@@ -10,6 +12,8 @@ class ReportCard extends StatelessWidget {
   final List<String>? images;
   final int upvotes;
   final VoidCallback onTap;
+  /// Tighter layout for horizontal carousels (avoids vertical overflow).
+  final bool compact;
 
   const ReportCard({
     super.key,
@@ -21,6 +25,7 @@ class ReportCard extends StatelessWidget {
     this.images,
     this.upvotes = 0,
     required this.onTap,
+    this.compact = false,
   });
 
   @override
@@ -28,10 +33,13 @@ class ReportCard extends StatelessWidget {
     // Get the first image as the thumbnail
     final String? thumbnail = images != null && images!.isNotEmpty ? images!.first : null;
 
+    final imageHeight = compact ? 88.0 : 140.0;
+    final contentPadding = compact ? 12.0 : 16.0;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: EdgeInsets.only(bottom: compact ? 0 : 16),
         decoration: BoxDecoration(
           color: AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(24),
@@ -51,18 +59,18 @@ class ReportCard extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 child: Image.network(
                   thumbnail,
-                  height: 140,
+                  height: imageHeight,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(
-                    height: 140,
+                    height: imageHeight,
                     color: AppColors.surfaceContainerHigh,
                     child: const Icon(Icons.broken_image_outlined, color: AppColors.outline),
                   ),
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(contentPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -70,20 +78,34 @@ class ReportCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
-                          category,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ReportFormatUtils.reportId(id),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            Text(
+                              category,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      _buildStatusBadge(status),
+                      const SizedBox(width: 6),
+                      StatusBadge(status: status, compact: compact),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: compact ? 8 : 12),
                   Row(
                     children: [
                       const Icon(Icons.location_on_outlined, size: 14, color: AppColors.outline),
@@ -158,43 +180,4 @@ class ReportCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
-    Color color;
-    String label;
-    
-    switch (status.toLowerCase()) {
-      case 'pending':
-        color = AppColors.statusPending;
-        label = 'REPORTED';
-        break;
-      case 'in_progress':
-        color = AppColors.statusInProgress;
-        label = 'IN PROGRESS';
-        break;
-      case 'resolved':
-        color = AppColors.statusResolved;
-        label = 'RESOLVED';
-        break;
-      default:
-        color = AppColors.outline;
-        label = status.toUpperCase();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 9,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
 }

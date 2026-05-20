@@ -31,3 +31,9 @@ final categoriesProvider = FutureProvider<List<dynamic>>((ref) async {
   final repository = ref.watch(reportRepositoryProvider);
   return repository.fetchCategories();
 });
+
+/// Provider for a single report detail (by ID)
+final reportDetailProvider = FutureProvider.family<ReportModel, String>((ref, id) async {
+  final repository = ref.watch(reportRepositoryProvider);
+  return repository.fetchReportById(id);
+});

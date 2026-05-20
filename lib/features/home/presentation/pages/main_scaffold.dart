@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../notifications/data/notification_providers.dart';
+import '../../../reporting/data/report_providers.dart';
 
-class MainScaffold extends StatelessWidget {
+class MainScaffold extends ConsumerWidget {
   final Widget child;
 
   const MainScaffold({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Keep badge count in sync when switching tabs / loading reports.
+    ref.watch(myReportsProvider);
+    ref.watch(notificationBadgeCountProvider);
+
     final int currentIndex = _selectedIndex(context);
 
     return Scaffold(

@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/notification_icon_button.dart';
 import '../../../../shared/widgets/report_card.dart';
+import '../../../../shared/widgets/status_badge.dart';
+import '../../../../core/utils/report_ownership.dart';
+import '../../../../core/utils/report_status_utils.dart';
+import '../../../auth/data/auth_providers.dart';
 import '../../domain/report_model.dart';
 import '../../data/report_providers.dart';
 
@@ -51,18 +56,19 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   child: Row(
                     children: [
-                      const Text(
-                        'CleanCity Reports',
-                        style: TextStyle(
+                      const Expanded(
+                        child: Text(
+                          'CleanCity Reports',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,
-                            fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.notifications_none_outlined, color: Colors.white),
-                        onPressed: () => context.push('/notifications'),
-                      ),
+                      const NotificationIconButton(),
                     ],
                   ),
                 ),
@@ -187,22 +193,30 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
     );
   }
 
+  List<ReportModel> _filterByStatus(List<ReportModel> reports, String filter) {
+    if (filter == 'All') return reports;
+    return reports.where((r) {
+      final statusLower = r.status.toLowerCase();
+      if (filter == 'Pending') return statusLower == 'pending';
+      if (filter == 'In Progress') return statusLower == 'in_progress';
+      if (filter == 'Resolved') return statusLower == 'resolved';
+      return false;
+    }).toList();
+  }
+
+  int _countForFilter(List<ReportModel> reports, String filter) {
+    return _filterByStatus(reports, filter).length;
+  }
+
   Widget _buildCityFeedView() {
     final cityReportsAsync = ref.watch(cityReportsProvider);
+    final currentUserId = ref.watch(currentUserIdProvider);
 
     return cityReportsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),
       data: (reports) {
-        final filteredReports = _activeFilter == 'All'
-            ? reports
-            : reports.where((r) {
-                String statusLower = r.status.toLowerCase();
-                if (_activeFilter == 'Pending') return statusLower == 'pending';
-                if (_activeFilter == 'In Progress') return statusLower == 'in_progress';
-                if (_activeFilter == 'Resolved') return statusLower == 'resolved';
-                return false;
-              }).toList();
+        final filteredReports = _filterByStatus(reports, _activeFilter);
 
         return CustomScrollView(
           slivers: [
@@ -225,8 +239,10 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                         Text('Community Reports',
                             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                         SizedBox(height: 4),
-                        Text('Support nearby issues to increase their priority.',
-                            style: TextStyle(fontSize: 13, color: AppColors.outline)),
+                        Text(
+                          'All community reports — support others\' issues to raise priority.',
+                          style: TextStyle(fontSize: 13, color: AppColors.outline),
+                        ),
                       ],
                     ),
                   ),
@@ -240,10 +256,11 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                       itemBuilder: (context, index) {
                         final filter = _filters[index];
                         final isSelected = _activeFilter == filter;
+                        final count = _countForFilter(reports, filter);
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: FilterChip(
-                            label: Text(filter),
+                            label: Text('$filter ($count)'),
                             selected: isSelected,
                             onSelected: (_) => setState(() => _activeFilter = filter),
                             backgroundColor: Colors.white,
@@ -266,7 +283,12 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                   const SizedBox(height: 20),
 
                   if (filteredReports.isEmpty)
-                    _buildEmptyState('No reports found for this filter.'),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                      child: _buildEmptyState(
+                        'No ${_activeFilter.toLowerCase()} reports in the city feed.',
+                      ),
+                    ),
 
                   ListView.builder(
                     shrinkWrap: true,
@@ -275,15 +297,33 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                     itemCount: filteredReports.length,
                     itemBuilder: (context, index) {
                       final report = filteredReports[index];
-                      return ReportCard(
-                        id: report.id,
-                        category: report.category,
-                        date: DateFormat('MMM dd, yyyy').format(report.date),
-                        status: report.status,
-                        location: report.location,
-                        images: report.images,
-                        upvotes: report.upvotes,
-                        onTap: () => context.push('/report-detail/${report.id}'),
+                      final isOwn = isOwnReport(report, currentUserId);
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (isOwn)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 6, left: 4),
+                              child: Text(
+                                'Your report',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary.withOpacity(0.85),
+                                ),
+                              ),
+                            ),
+                          ReportCard(
+                            id: report.id,
+                            category: report.category,
+                            date: DateFormat('MMM dd, yyyy').format(report.date),
+                            status: report.status,
+                            location: report.location,
+                            images: report.images,
+                            upvotes: report.upvotes,
+                            onTap: () => context.push('/report-detail/${report.id}'),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -349,7 +389,7 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                     ],
                   ),
                 ),
-                _statusBadge(report.status),
+                StatusBadge(status: report.status),
               ],
             ),
           ),
@@ -363,29 +403,6 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
           ),
         ],
       ),
-    );
-  }
-
-  Widget _statusBadge(String status) {
-    Color color;
-    switch (status.toLowerCase()) {
-      case 'pending': color = AppColors.statusPending; break;
-      case 'in_progress': color = AppColors.statusInProgress; break;
-      case 'resolved': color = AppColors.statusResolved; break;
-      default: color = AppColors.outline;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(status.toUpperCase(),
-          style: TextStyle(
-              color: color,
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5)),
     );
   }
 
@@ -504,21 +521,8 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
               final history = report.statusHistory[index];
               final isLast = index == report.statusHistory.length - 1;
               
-              Color iconColor;
-              switch (history.status.toLowerCase()) {
-                case 'pending': iconColor = AppColors.statusPending; break;
-                case 'in_progress': iconColor = AppColors.statusInProgress; break;
-                case 'resolved': iconColor = AppColors.statusResolved; break;
-                default: iconColor = AppColors.outline;
-              }
-
-              IconData icon;
-              switch (history.status.toLowerCase()) {
-                case 'pending': icon = Icons.upload_file_outlined; break;
-                case 'in_progress': icon = Icons.verified_outlined; break;
-                case 'resolved': icon = Icons.check_circle_outline; break;
-                default: icon = Icons.info_outline;
-              }
+              final iconColor = ReportStatusUtils.badgeBackground(history.status);
+              final icon = ReportStatusUtils.icon(history.status);
 
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,

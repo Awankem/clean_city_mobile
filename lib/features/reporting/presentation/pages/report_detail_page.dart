@@ -5,7 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/report_format_utils.dart';
+import '../../../../core/utils/report_status_utils.dart';
+import '../../../../shared/widgets/priority_bar.dart';
+import '../../../../shared/widgets/status_badge.dart';
 import '../../domain/report_model.dart';
+import '../../../auth/data/auth_providers.dart';
+import '../../../../core/utils/report_ownership.dart';
 import '../../data/report_providers.dart';
 import '../../data/mock_reporting_data.dart';
 
@@ -25,14 +31,26 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
   late int localPriority;
   final PageController _pageController = PageController();
   int _currentImageIndex = 0;
-  bool _initialized = false;
-
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      _loadReport();
-      _initialized = true;
+  void initState() {
+    super.initState();
+    _loadReport();
+    _fetchReportFromApi();
+  }
+
+  Future<void> _fetchReportFromApi() async {
+    try {
+      final fetched = await ref.read(reportRepositoryProvider).fetchReportById(widget.reportId);
+      if (mounted) {
+        setState(() {
+          report = fetched;
+          localUpvotes = fetched.upvotes;
+          localPriority = fetched.priorityScore;
+          isUpvoted = fetched.hasVoted;
+        });
+      }
+    } catch (_) {
+      // Keep cache/mock fallback from _loadReport
     }
   }
 
@@ -48,6 +66,7 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
     );
     localUpvotes = report.upvotes;
     localPriority = report.priorityScore;
+    isUpvoted = report.hasVoted;
   }
 
   @override
@@ -56,33 +75,54 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
     super.dispose();
   }
 
-  void _toggleUpvote() {
-    setState(() {
-      if (isUpvoted) {
-        localUpvotes--;
-        localPriority -= 2;
-      } else {
+  Future<void> _toggleUpvote() async {
+    final currentUserId = ref.read(currentUserIdProvider);
+    if (isOwnReport(report, currentUserId)) return;
+    if (isUpvoted) return;
+
+    try {
+      await ref.read(reportRepositoryProvider).upvote(widget.reportId);
+      setState(() {
+        isUpvoted = true;
         localUpvotes++;
         localPriority += 2;
-      }
-      isUpvoted = !isUpvoted;
-    });
-    
-    Feedback.forTap(context);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(isUpvoted ? 'You supported this report!' : 'Support removed'),
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: isUpvoted ? AppColors.statusResolved : AppColors.statusPending,
-      ),
-    );
+      });
+      ref.invalidate(cityReportsProvider);
+      ref.invalidate(myReportsProvider);
+
+      if (!mounted) return;
+      Feedback.forTap(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You supported this report!'),
+          duration: Duration(seconds: 1),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.primaryContainer,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().contains('403') || e.toString().contains('own')
+                ? 'You cannot upvote your own report'
+                : e.toString().contains('400')
+                    ? 'You have already upvoted this report'
+                    : 'Could not upvote. Try again.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final reportColor = _getCategoryColor();
+    final currentUserId = ref.watch(currentUserIdProvider);
+    final isOwn = isOwnReport(report, currentUserId);
+    final canUpvote = !isOwn && !isUpvoted;
 
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLow,
@@ -217,7 +257,7 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        'Report #${report.id.padLeft(4, '0')}',
+                        ReportFormatUtils.reportId(report.id),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -254,7 +294,7 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                               ),
                             ),
                           ),
-                          _statusBadge(report.status),
+                          StatusBadge(status: report.status),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -309,47 +349,85 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                             color: isUpvoted ? AppColors.statusResolved : AppColors.primary,
                           ).animate(target: isUpvoted ? 1 : 0).shimmer(duration: 400.ms),
                           const SizedBox(width: 24),
-                          _buildMetric(
-                            label: 'PRIORITY LEVEL',
-                            value: '$localPriority Score',
-                            icon: Icons.analytics_outlined,
-                            color: AppColors.statusInProgress,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'PRIORITY LEVEL',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.onSurface.withOpacity(0.45),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                PriorityBar(score: localPriority, width: 64),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: OutlinedButton.icon(
-                          onPressed: _toggleUpvote,
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
+                      if (isOwn)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainerHigh,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, color: AppColors.onSurface.withOpacity(0.5), size: 20),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'This is your report — you cannot upvote it. Others can support it to raise priority.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.onSurface.withOpacity(0.65),
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: canUpvote ? _toggleUpvote : null,
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: isUpvoted ? AppColors.statusResolved : AppColors.primary,
+                                width: 1.5,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              backgroundColor: isUpvoted
+                                  ? AppColors.statusResolved.withOpacity(0.05)
+                                  : Colors.transparent,
+                            ),
+                            icon: Icon(
+                              isUpvoted ? Icons.check_circle : Icons.add_moderator_outlined,
                               color: isUpvoted ? AppColors.statusResolved : AppColors.primary,
-                              width: 1.5,
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            backgroundColor: isUpvoted 
-                                ? AppColors.statusResolved.withOpacity(0.05) 
-                                : Colors.transparent,
-                          ),
-                          icon: Icon(
-                            isUpvoted ? Icons.check_circle : Icons.add_moderator_outlined,
-                            color: isUpvoted ? AppColors.statusResolved : AppColors.primary,
-                          ),
-                          label: Text(
-                            isUpvoted ? 'SUPPORTED BY YOU' : 'SUPPORT THIS REPORT',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: isUpvoted ? AppColors.statusResolved : AppColors.primary,
-                              letterSpacing: 1,
+                            label: Text(
+                              isUpvoted ? 'SUPPORTED BY YOU' : 'SUPPORT THIS REPORT',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: isUpvoted ? AppColors.statusResolved : AppColors.primary,
+                                letterSpacing: 1,
+                              ),
                             ),
                           ),
-                        ),
-                      ).animate(target: isUpvoted ? 1 : 0).scale(duration: 200.ms, begin: const Offset(1, 1), end: const Offset(1.02, 1.02)),
+                        ).animate(target: isUpvoted ? 1 : 0).scale(duration: 200.ms, begin: const Offset(1, 1), end: const Offset(1.02, 1.02)),
                     ],
                   ),
                 ),
@@ -610,39 +688,9 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
     );
   }
 
-  Widget _statusBadge(String status) {
-    Color color = _getStatusColor(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        status.toUpperCase(),
-        style: TextStyle(
-            color: color, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-      ),
-    );
-  }
+  Color _getStatusColor(String status) => ReportStatusUtils.badgeBackground(status);
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending': return AppColors.statusPending;
-      case 'in_progress': return AppColors.statusInProgress;
-      case 'resolved': return AppColors.statusResolved;
-      default: return AppColors.outline;
-    }
-  }
-
-  IconData _getStatusIcon(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending': return Icons.upload_file_outlined;
-      case 'in_progress': return Icons.verified_outlined;
-      case 'resolved': return Icons.check_circle_outline;
-      default: return Icons.info_outline;
-    }
-  }
+  IconData _getStatusIcon(String status) => ReportStatusUtils.icon(status);
 
   Color _getCategoryColor() {
     if (report.categoryColor != null) {

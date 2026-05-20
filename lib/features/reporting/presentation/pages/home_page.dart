@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/report_status_utils.dart';
+import '../../../../shared/widgets/admin_stat_card.dart';
+import '../../../../shared/widgets/notification_icon_button.dart';
 import '../../../../shared/widgets/report_card.dart';
 import '../../domain/report_model.dart';
 import '../../data/report_providers.dart';
@@ -13,7 +16,8 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reportsAsync = ref.watch(cityReportsProvider);
+    final myReportsAsync = ref.watch(myReportsProvider);
+    final cityReportsAsync = ref.watch(cityReportsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLow,
@@ -30,11 +34,8 @@ class HomePage extends ConsumerWidget {
               'CleanCity',
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none_outlined, color: Colors.white),
-                onPressed: () => context.push('/notifications'),
-              ),
+            actions: const [
+              NotificationIconButton(),
             ],
           ),
 
@@ -59,7 +60,7 @@ class HomePage extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Text(
-                              'CITY OVERVIEW',
+                              'YOUR DASHBOARD',
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
@@ -71,9 +72,10 @@ class HomePage extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      reportsAsync.when(
+                      myReportsAsync.when(
                         data: (reports) {
-                          final resolvedCount = reports.where((r) => r.status.toLowerCase() == 'resolved').length;
+                          final resolvedCount =
+                              reports.where((r) => r.status.toLowerCase() == 'resolved').length;
                           return Text(
                             '$resolvedCount',
                             style: const TextStyle(
@@ -108,7 +110,7 @@ class HomePage extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        'Reports Resolved across the city.',
+                        'Reports you\'ve resolved.',
                         style: TextStyle(
                           fontSize: 16,
                           color: AppColors.onSurface.withOpacity(0.65),
@@ -121,6 +123,63 @@ class HomePage extends ConsumerWidget {
 
                 const SizedBox(height: 20),
 
+                // Your report stats
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: myReportsAsync.when(
+                    data: (reports) {
+                      final pending =
+                          reports.where((r) => r.status.toLowerCase() == 'pending').length;
+                      final inProgress =
+                          reports.where((r) => r.status.toLowerCase() == 'in_progress').length;
+                      final resolved =
+                          reports.where((r) => r.status.toLowerCase() == 'resolved').length;
+                      return GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 1.05,
+                        children: [
+                          AdminStatCard(
+                            label: 'Total Reports',
+                            value: '${reports.length}',
+                            icon: Icons.fact_check_outlined,
+                            accent: AppColors.primary,
+                          ),
+                          AdminStatCard(
+                            label: 'Pending',
+                            value: '$pending',
+                            icon: Icons.pending_actions_outlined,
+                            accent: AppColors.tertiaryContainer,
+                            badge: pending > 0 ? 'Active' : null,
+                          ),
+                          AdminStatCard(
+                            label: 'In Progress',
+                            value: '$inProgress',
+                            icon: Icons.moped_outlined,
+                            accent: AppColors.secondary,
+                          ),
+                          AdminStatCard(
+                            label: 'Resolved',
+                            value: '$resolved',
+                            icon: Icons.task_alt_outlined,
+                            accent: AppColors.primaryContainer,
+                          ),
+                        ],
+                      );
+                    },
+                    loading: () => const SizedBox(
+                      height: 120,
+                      child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+                    ),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
                 // Recent Reports section
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -128,11 +187,11 @@ class HomePage extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Recent Reports',
+                        'Your Recent Reports',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       TextButton(
-                        onPressed: () => context.go('/reports?feed=true'),
+                        onPressed: () => context.go('/reports'),
                         child: const Text('View All',
                             style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                       ),
@@ -143,14 +202,15 @@ class HomePage extends ConsumerWidget {
 
                 // Scrollable report cards
                 SizedBox(
-                  height: 200,
-                  child: reportsAsync.when(
+                  height: 228,
+                  child: myReportsAsync.when(
                     data: (reports) {
-                      final activeReports = reports.where((r) => r.status.toLowerCase() != 'resolved').toList();
-                      if (activeReports.isEmpty) {
+                      final sorted = [...reports]..sort((a, b) => b.date.compareTo(a.date));
+                      final recentReports = sorted.take(5).toList();
+                      if (recentReports.isEmpty) {
                         return const Center(
                           child: Text(
-                            'No active reports currently.',
+                            'You haven\'t submitted any reports yet.',
                             style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
                         );
@@ -158,18 +218,20 @@ class HomePage extends ConsumerWidget {
                       return ListView.builder(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: activeReports.length > 5 ? 5 : activeReports.length,
+                        itemCount: recentReports.length,
                         itemBuilder: (context, index) {
-                          final report = activeReports[index];
+                          final report = recentReports[index];
                           return Container(
                             width: 280,
                             margin: const EdgeInsets.only(right: 12),
                             child: ReportCard(
+                              compact: true,
                               id: report.id,
                               category: report.category,
                               date: DateFormat('MMM dd').format(report.date),
                               status: report.status,
                               location: report.location,
+                              images: report.images,
                               upvotes: report.upvotes,
                               onTap: () => context.push('/report-detail/${report.id}'),
                             ),
@@ -201,7 +263,7 @@ class HomePage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
 
-                reportsAsync.when(
+                cityReportsAsync.when(
                   data: (reports) {
                     final highPriorityReports = reports
                         .where((r) => r.status.toLowerCase() != 'resolved')
@@ -212,7 +274,7 @@ class HomePage extends ConsumerWidget {
                       return const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         child: Text(
-                          'No active priority issues reported.',
+                          'No active priority issues in the city.',
                           style: TextStyle(color: Colors.grey, fontSize: 14),
                         ),
                       );
@@ -223,13 +285,9 @@ class HomePage extends ConsumerWidget {
                       children: List.generate(displayCount, (index) {
                         final report = highPriorityReports[index];
                         
-                        // Map status to badge
-                        String badge = 'REPORTED';
-                        Color badgeColor = AppColors.statusPending;
-                        if (report.status.toLowerCase() == 'in_progress') {
-                          badge = 'IN PROGRESS';
-                          badgeColor = AppColors.statusInProgress;
-                        }
+                        final badge = ReportStatusUtils.badgeLabel(report.status);
+                        final badgeColor = ReportStatusUtils.badgeBackground(report.status);
+                        final badgeTextColor = ReportStatusUtils.color(report.status);
 
                         return GestureDetector(
                           onTap: () => context.push('/report-detail/${report.id}'),
@@ -237,11 +295,12 @@ class HomePage extends ConsumerWidget {
                             context,
                             icon: _getCategoryIcon(report.categoryIcon),
                             iconBg: badgeColor.withOpacity(0.12),
-                            iconColor: badgeColor,
+                            iconColor: badgeTextColor == Colors.white ? badgeColor : badgeTextColor,
                             title: report.location,
                             subtitle: '${report.category} · Priority Score: ${report.priorityScore}',
                             badge: badge,
                             badgeColor: badgeColor,
+                            badgeTextColor: badgeTextColor,
                           ),
                         );
                       }),
@@ -283,6 +342,7 @@ class HomePage extends ConsumerWidget {
     required String subtitle,
     required String badge,
     required Color badgeColor,
+    Color badgeTextColor = AppColors.onSurface,
   }) {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 12),
@@ -313,12 +373,12 @@ class HomePage extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: badgeColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
+              color: badgeColor,
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Text(badge,
                 style: TextStyle(
-                    color: badgeColor, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                    color: badgeTextColor, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
           ),
         ],
       ),

@@ -6,10 +6,12 @@ class ApiConstants {
   static const String register = '/register';
   static const String logout = '/logout';
   static const String user = '/user';
+  static const String updateFcmToken = '/user/update-token';
   
   // Reports
   static const String reports = '/reports';
   static const String myReports = '/my-reports';
+  static const String reportDetail = '/reports/{id}';
   static const String categories = '/categories';
   static const String reportVotes = '/reports/{id}/upvote';
   

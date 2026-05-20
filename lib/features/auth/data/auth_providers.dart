@@ -10,3 +10,8 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 final userProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   return ref.watch(authRepositoryProvider).getUser();
 });
+
+final currentUserIdProvider = Provider<String?>((ref) {
+  final user = ref.watch(userProvider).asData?.value;
+  return user?['id']?.toString();
+});

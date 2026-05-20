@@ -27,10 +27,13 @@ class AppColors {
   static const Color outlineVariant = Color(0x26BEC9C0); // 15% opacity - Ghost Border rule
   static const Color outlineVariantSolid = Color(0xFFBEC9C0); // full opacity for dividers
 
-  // Status Colors (Matching Laravel)
-  static const Color statusPending = Color(0xFF455A64); // Muted blue-gray
-  static const Color statusInProgress = Color(0xFFE69138); // Amber/Orange
-  static const Color statusResolved = Color(0xFF006241); // Deep Civic Green
+  // On-surface variant (Laravel admin muted text)
+  static const Color onSurfaceVariant = Color(0xFF3F4943);
+
+  // Legacy status aliases — prefer ReportStatusUtils for badges
+  static const Color statusPending = tertiaryContainer;
+  static const Color statusInProgress = secondaryContainer;
+  static const Color statusResolved = primaryContainer;
   
   // Signature treatments
   static const LinearGradient primaryGradient = LinearGradient(

@@ -77,6 +77,19 @@ class ReportRepository {
     }
   }
 
+  /// Fetch a single report by ID
+  Future<ReportModel> fetchReportById(String reportId) async {
+    if (useMockData) {
+      await Future.delayed(const Duration(milliseconds: 400));
+      final all = [...MockReportingData.mockCityFeed, ...MockReportingData.mockMyActivity];
+      return all.firstWhere((r) => r.id == reportId, orElse: () => MockReportingData.mockCityFeed.first);
+    }
+
+    final url = ApiConstants.reportDetail.replaceAll('{id}', reportId);
+    final response = await _dio.get(url);
+    return _mapJsonToReport(response.data as Map<String, dynamic>);
+  }
+
   /// Upvote a report
   Future<void> upvote(String reportId) async {
     try {
@@ -127,6 +140,7 @@ class ReportRepository {
 
     return ReportModel(
       id: json['id'].toString(),
+      userId: json['user_id']?.toString(),
       category: categoryData['name'] ?? 'Unknown',
       categoryIcon: categoryData['icon'],
       categoryColor: categoryData['color'],
@@ -140,6 +154,7 @@ class ReportRepository {
       longitude: double.parse(json['longitude'].toString()),
       upvotes: json['upvotes_count'] ?? 0,
       priorityScore: json['priority_score'] ?? 0,
+      hasVoted: json['user_has_voted'] == true,
       statusHistory: history,
     );
   }

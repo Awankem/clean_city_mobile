@@ -23,6 +23,7 @@ class StatusHistoryModel {
 
 class ReportModel {
   final String id;
+  final String? userId;
   final String category;
   final String? categoryIcon; // Dynamic icon from backend
   final String? categoryColor; // Dynamic color from backend
@@ -36,10 +37,12 @@ class ReportModel {
   final double longitude;
   final int upvotes;
   final int priorityScore;
+  final bool hasVoted;
   final List<StatusHistoryModel> statusHistory;
 
   ReportModel({
     required this.id,
+    this.userId,
     required this.category,
     this.categoryIcon,
     this.categoryColor,
@@ -53,6 +56,7 @@ class ReportModel {
     required this.longitude,
     this.upvotes = 0,
     this.priorityScore = 0,
+    this.hasVoted = false,
     this.statusHistory = const [],
   });
 }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import '../constants/api_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,6 +15,19 @@ class DioClient {
       'Content-Type': 'application/json',
     },
   )) {
+    // Configure cache options
+    final cacheOptions = CacheOptions(
+      store: MemCacheStore(),
+      policy: CachePolicy.request, // Request if cache expired, fallback to cache on network errors
+      hitCacheOnErrorCodes: [500, 502, 503, 504],
+      hitCacheOnNetworkFailure: true,
+      maxStale: const Duration(days: 7),
+      priority: CachePriority.normal,
+    );
+
+    // Add Cache Interceptor first
+    _dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
+
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final prefs = await SharedPreferences.getInstance();

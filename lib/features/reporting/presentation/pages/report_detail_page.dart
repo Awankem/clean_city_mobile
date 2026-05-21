@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -167,10 +168,16 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                       onPageChanged: (index) => setState(() => _currentImageIndex = index),
                       itemCount: report.images.length,
                       itemBuilder: (context, index) {
-                        return Image.network(
-                          report.images[index],
+                        return CachedNetworkImage(
+                          imageUrl: report.images[index],
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
+                          placeholder: (context, url) => Container(
+                            color: reportColor.withOpacity(0.1),
+                            child: const Center(
+                              child: CircularProgressIndicator(color: AppColors.primary),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
                             color: reportColor.withOpacity(0.2),
                             child: Icon(
                               _getCategoryIcon(),

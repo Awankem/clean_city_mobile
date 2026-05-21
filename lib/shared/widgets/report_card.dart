@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import 'status_badge.dart';
 import '../../core/utils/report_format_utils.dart';
@@ -57,12 +58,23 @@ class ReportCard extends StatelessWidget {
             if (thumbnail != null)
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                child: Image.network(
-                  thumbnail,
+                child: CachedNetworkImage(
+                  imageUrl: thumbnail,
                   height: imageHeight,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
+                  placeholder: (context, url) => Container(
+                    height: imageHeight,
+                    color: AppColors.surfaceContainerHigh,
+                    child: const Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
                     height: imageHeight,
                     color: AppColors.surfaceContainerHigh,
                     child: const Icon(Icons.broken_image_outlined, color: AppColors.outline),

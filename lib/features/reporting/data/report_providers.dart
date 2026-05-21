@@ -16,12 +16,14 @@ final reportRepositoryProvider = Provider<ReportRepository>((ref) {
 
 /// Provider for the Public City Feed reports
 final cityReportsProvider = FutureProvider<List<ReportModel>>((ref) async {
+  ref.keepAlive();
   final repository = ref.watch(reportRepositoryProvider);
   return repository.fetchReports();
 });
 
 /// Provider for the Current User's reports (My Activity)
 final myReportsProvider = FutureProvider<List<ReportModel>>((ref) async {
+  ref.keepAlive();
   final repository = ref.watch(reportRepositoryProvider);
   return repository.fetchMyReports();
 });

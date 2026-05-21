@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:clean_city/core/theme/app_colors.dart';
 import 'package:clean_city/core/services/mapbox_service.dart';
@@ -698,11 +699,22 @@ class _ReportDetailsSheetState extends ConsumerState<_ReportDetailsSheet> {
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) => ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: Image.network(
-                      report.images[index],
+                    child: CachedNetworkImage(
+                      imageUrl: report.images[index],
                       width: 250,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(width: 250, color: Colors.grey[100], child: const Icon(Icons.image_not_supported)),
+                      placeholder: (context, url) => Container(
+                        width: 250,
+                        color: Colors.grey[100],
+                        child: const Center(
+                          child: CircularProgressIndicator(color: AppColors.primary),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        width: 250,
+                        color: Colors.grey[100],
+                        child: const Icon(Icons.image_not_supported),
+                      ),
                     ),
                   ),
                 ),

@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../domain/report_model.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/constants/api_constants.dart';
@@ -102,10 +104,20 @@ class ReportRepository {
 
   /// Fetch available categories
   Future<List<dynamic>> fetchCategories() async {
+    final prefs = await SharedPreferences.getInstance();
+    const String cacheKey = 'cached_report_categories';
     try {
       final response = await _dio.get(ApiConstants.categories);
-      return response.data as List<dynamic>;
+      final list = response.data as List<dynamic>;
+      await prefs.setString(cacheKey, jsonEncode(list));
+      return list;
     } catch (e) {
+      final cached = prefs.getString(cacheKey);
+      if (cached != null) {
+        try {
+          return jsonDecode(cached) as List<dynamic>;
+        } catch (_) {}
+      }
       rethrow;
     }
   }

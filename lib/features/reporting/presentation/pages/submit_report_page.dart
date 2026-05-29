@@ -7,6 +7,8 @@ import 'package:geolocator/geolocator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../data/report_providers.dart';
+import 'location_picker_page.dart';
+import 'package:latlong2/latlong.dart';
 
 class SubmitReportPage extends ConsumerStatefulWidget {
   const SubmitReportPage({super.key});
@@ -17,7 +19,7 @@ class SubmitReportPage extends ConsumerStatefulWidget {
 
 class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
   final List<File> _images = [];
-  String _address = 'Detecting location...';
+  final _addressController = TextEditingController(text: 'Detecting location...');
   String _coordinates = '';
   double? _lat;
   double? _lng;
@@ -30,6 +32,13 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
   void initState() {
     super.initState();
     _determinePosition();
+  }
+
+  @override
+  void dispose() {
+    _addressController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   Future<void> _determinePosition() async {
@@ -55,7 +64,7 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
       setState(() {
         _lat = position.latitude;
         _lng = position.longitude;
-        _address = 'Detected Location Area'; // Would ideally use geocoding here
+        _addressController.text = 'Detected Location Area'; // Would ideally use geocoding here
         _coordinates =
             'Coordinates: ${position.latitude.toStringAsFixed(4)}° N, ${position.longitude.toStringAsFixed(4)}° E';
       });
@@ -64,7 +73,7 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
       setState(() {
         _lat = 5.9631;
         _lng = 10.1591;
-        _address = 'Commercial Avenue, Bamenda';
+        _addressController.text = 'Commercial Avenue, Bamenda';
         _coordinates = 'Coordinates: 5.9631° N, 10.1591° E';
       });
     }
@@ -93,7 +102,7 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
         description: _descriptionController.text,
         latitude: _lat ?? 0.0,
         longitude: _lng ?? 0.0,
-        locationName: _address,
+        locationName: _addressController.text,
         imagePaths: _images.map((f) => f.path).toList(),
       );
 
@@ -398,38 +407,78 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      'DETECTED LOCATION',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.outline,
-                                        letterSpacing: 1,
-                                      ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'DETECTED LOCATION',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.outline,
+                                            letterSpacing: 1,
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () async {
+                                            if (_lat == null || _lng == null) return;
+                                            final result = await Navigator.push<LocationPickerResult>(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => LocationPickerPage(
+                                                  initialLocation: LatLng(_lat!, _lng!),
+                                                ),
+                                              ),
+                                            );
+                                            
+                                            if (result != null && mounted) {
+                                              setState(() {
+                                                _lat = result.coordinates.latitude;
+                                                _lng = result.coordinates.longitude;
+                                                _addressController.text = result.address;
+                                                _coordinates = 'Coordinates: ${_lat!.toStringAsFixed(4)}° N, ${_lng!.toStringAsFixed(4)}° E';
+                                              });
+                                            }
+                                          },
+                                          child: const Text(
+                                            'Edit on Map',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                     const SizedBox(height: 3),
-                                    Text(
-                                      _address,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                        color: AppColors.onSurface,
-                                      ),
-                                    ),
-                                    if (_coordinates.isNotEmpty)
-                                      Text(
-                                        _coordinates,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.onSurface.withOpacity(0.55),
+                                      TextField(
+                                        controller: _addressController,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                          color: AppColors.onSurface,
+                                        ),
+                                        decoration: const InputDecoration(
+                                          isDense: true,
+                                          contentPadding: EdgeInsets.zero,
+                                          border: InputBorder.none,
                                         ),
                                       ),
-                                  ],
+                                      if (_coordinates.isNotEmpty)
+                                        Text(
+                                          _coordinates,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.onSurface.withOpacity(0.55),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
                         // Map preview placeholder
                         ClipRRect(
                           borderRadius:

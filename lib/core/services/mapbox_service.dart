@@ -13,9 +13,16 @@ class MapboxService {
     return 'https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=$_accessToken';
   }
 
-  static Future<LatLng> forwardGeocode(String query) async {
+  /// Forward geocode a query string into coordinates and a place name.
+  /// Results are biased toward Bamenda, Cameroon for relevance.
+  static Future<({LatLng location, String placeName})> forwardGeocode(String query) async {
     final encodedQuery = Uri.encodeComponent(query);
-    final url = '$_baseUrl/geocoding/v5/mapbox.places/$encodedQuery.json?access_token=$_accessToken&limit=1';
+    // proximity biases results near Bamenda; country limits to Cameroon
+    final url = '$_baseUrl/geocoding/v5/mapbox.places/$encodedQuery.json'
+        '?access_token=$_accessToken'
+        '&limit=5'
+        '&proximity=10.1591,5.9631'
+        '&country=cm';
     
     final response = await http.get(Uri.parse(url));
     
@@ -25,10 +32,14 @@ class MapboxService {
       if (data['features'] != null && data['features'].isNotEmpty) {
         final feature = data['features'][0];
         final coordinates = feature['geometry']['coordinates'];
+        final placeName = feature['place_name'] as String? ?? query;
         
-        return LatLng(
-          coordinates[1].toDouble(),
-          coordinates[0].toDouble(),
+        return (
+          location: LatLng(
+            coordinates[1].toDouble(),
+            coordinates[0].toDouble(),
+          ),
+          placeName: placeName,
         );
       } else {
         throw Exception('No results found for "$query"');

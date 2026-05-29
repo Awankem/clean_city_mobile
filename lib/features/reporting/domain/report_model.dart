@@ -12,11 +12,20 @@ class StatusHistoryModel {
   });
 
   factory StatusHistoryModel.fromJson(Map<String, dynamic> json) {
+    // changed_by can be a string, a nested user object, or null
+    String? changedByName;
+    final changedByRaw = json['changed_by'];
+    if (changedByRaw is Map<String, dynamic>) {
+      changedByName = changedByRaw['name'] as String?;
+    } else if (changedByRaw is String) {
+      changedByName = changedByRaw;
+    }
+
     return StatusHistoryModel(
       status: json['new_status'] ?? '',
       note: json['note'],
       createdAt: DateTime.parse(json['created_at']),
-      changedBy: json['changed_by']?.toString(), // Simplified for now
+      changedBy: changedByName,
     );
   }
 }

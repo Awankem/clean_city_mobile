@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
+enum MapStyle { dark, streets, satellite }
+
 class MapboxService {
   static const String _accessToken = String.fromEnvironment(
     'MAPBOX_ACCESS_TOKEN',
@@ -9,8 +11,16 @@ class MapboxService {
   );
   static const String _baseUrl = 'https://api.mapbox.com';
 
-  static String getTileLayerUrl() {
-    return 'https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=$_accessToken';
+  static String getTileLayerUrl({MapStyle style = MapStyle.dark}) {
+    switch (style) {
+      case MapStyle.streets:
+        return 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=$_accessToken';
+      case MapStyle.satellite:
+        return 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token=$_accessToken';
+      case MapStyle.dark:
+      default:
+        return 'https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=$_accessToken';
+    }
   }
 
   /// Forward geocode a query string into coordinates and a place name.

@@ -4,8 +4,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/notification_icon_button.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../reporting/data/report_providers.dart';
+import '../providers/profile_settings_provider.dart';
 import '../../data/auth_providers.dart';
+import '../../../reporting/data/report_providers.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -14,6 +15,7 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final myReportsAsync = ref.watch(myReportsProvider);
     final reportsCount = myReportsAsync.asData?.value.length ?? 0;
+
     
     final userAsync = ref.watch(userProvider);
 
@@ -172,13 +174,21 @@ class ProfilePage extends ConsumerWidget {
                   icon: Icons.notifications_active_outlined,
                   title: 'Push Notifications',
                   subtitle: 'Real-time status updates on reports',
-                  trailing: Switch(value: true, onChanged: (_) {}, activeColor: AppColors.primary),
+                  trailing: Switch(
+                      value: ref.watch(pushNotificationProvider),
+                      onChanged: (val) => ref.read(pushNotificationProvider.notifier).state = val,
+                      activeColor: AppColors.primary,
+                    ),
                 ),
                 _buildSettingCard(
                   icon: Icons.sms_outlined,
                   title: 'SMS Alerts',
                   subtitle: 'Urgent civic announcements only',
-                  trailing: Switch(value: false, onChanged: (_) {}, activeColor: AppColors.primary),
+                  trailing: Switch(
+                      value: ref.watch(smsAlertProvider),
+                      onChanged: (val) => ref.read(smsAlertProvider.notifier).state = val,
+                      activeColor: AppColors.primary,
+                    ),
                 ),
                 const SizedBox(height: 20),
                 Padding(

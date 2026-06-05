@@ -26,6 +26,7 @@ class _MapPageState extends ConsumerState<MapPage> {
   final TextEditingController _searchController = TextEditingController();
   LatLng? _currentLocation;
   bool _isLocating = false;
+  MapStyle _currentMapStyle = MapStyle.dark;
 
   @override
   void initState() {
@@ -110,7 +111,7 @@ class _MapPageState extends ConsumerState<MapPage> {
               ),
               children: [
                 TileLayer(
-                  urlTemplate: MapboxService.getTileLayerUrl(),
+                  urlTemplate: MapboxService.getTileLayerUrl(style: _currentMapStyle),
                   tileProvider: NetworkTileProvider(),
                   userAgentPackageName: 'com.clean.city',
                 ),
@@ -182,29 +183,28 @@ class _MapPageState extends ConsumerState<MapPage> {
           // Map Action Controls (Zoom & Location)
           Positioned(
             right: 16,
-            bottom: 120, // Positioned above the draggable sheet's min height
+            bottom: 120,
             child: Column(
               children: [
                 _buildMapActionButton(
                   icon: Icons.add,
-                  onPressed: () {
-                    final newZoom = _mapController.camera.zoom + 1;
-                    _mapController.move(_mapController.camera.center, newZoom);
-                  },
+                  onPressed: () => _mapController.move(_mapController.camera.center, _mapController.camera.zoom + 1),
                 ),
                 const SizedBox(height: 8),
                 _buildMapActionButton(
                   icon: Icons.remove,
-                  onPressed: () {
-                    final newZoom = _mapController.camera.zoom - 1;
-                    _mapController.move(_mapController.camera.center, newZoom);
-                  },
+                  onPressed: () => _mapController.move(_mapController.camera.center, _mapController.camera.zoom - 1),
                 ),
                 const SizedBox(height: 8),
                 _buildMapActionButton(
                   icon: _isLocating ? Icons.hourglass_empty : Icons.my_location,
                   onPressed: _determinePosition,
                   isPrimary: true,
+                ),
+                const SizedBox(height: 8),
+                _buildMapActionButton(
+                  icon: Icons.layers,
+                  onPressed: () => setState(() => _currentMapStyle = _currentMapStyle == MapStyle.dark ? MapStyle.streets : MapStyle.dark),
                 ),
               ],
             ),

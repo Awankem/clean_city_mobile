@@ -64,7 +64,7 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
       setState(() {
         _lat = position.latitude;
         _lng = position.longitude;
-        _addressController.text = 'Detected Location Area'; // Would ideally use geocoding here
+        _addressController.text = 'Detected Location Area';
         _coordinates =
             'Coordinates: ${position.latitude.toStringAsFixed(4)}° N, ${position.longitude.toStringAsFixed(4)}° E';
       });
@@ -107,8 +107,7 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
       );
 
       if (!mounted) return;
-      
-      // Invalidate providers to refresh data
+
       ref.invalidate(cityReportsProvider);
       ref.invalidate(myReportsProvider);
 
@@ -165,16 +164,19 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
               ),
               const SizedBox(height: 20),
               ListTile(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
+                    color: AppColors.surfaceContainerLow,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+                  child: const Icon(Icons.camera_alt_outlined,
+                      color: AppColors.primary),
                 ),
-                title: const Text('Take Photo', style: TextStyle(fontWeight: FontWeight.w600)),
+                title: const Text('Take Photo',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: const Text('Use your camera'),
                 onTap: () {
                   Navigator.pop(context);
@@ -182,16 +184,19 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
                 },
               ),
               ListTile(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
+                    color: AppColors.surfaceContainerLow,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
+                  child: const Icon(Icons.photo_library_outlined,
+                      color: AppColors.primary),
                 ),
-                title: const Text('Choose from Gallery', style: TextStyle(fontWeight: FontWeight.w600)),
+                title: const Text('Choose from Gallery',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: const Text('Select an existing photo'),
                 onTap: () {
                   Navigator.pop(context);
@@ -211,399 +216,445 @@ class _SubmitReportPageState extends ConsumerState<SubmitReportPage> {
 
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text(
-          'CleanCity',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            decoration: const BoxDecoration(
-              color: Colors.black26,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.lightbulb_outline, color: Colors.white, size: 20),
-              onPressed: () {},
-            ),
-          )
-        ],
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-            // Page Title area
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-              color: Colors.white,
+      body: SafeArea(
+        bottom: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'New Report',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                      letterSpacing: -0.56,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Help us keep the city clean by documenting environmental issues.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.onSurface.withOpacity(0.6),
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // -- EVIDENCE PHOTOS section --
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(child: _sectionLabel('EVIDENCE PHOTOS (${_images.length}/5)')),
-                      if (_images.length < 5)
-                        TextButton.icon(
-                          onPressed: _showImagePickerOptions,
-                          icon: const Icon(Icons.add_a_photo, size: 16),
-                          label: const Text('Add', style: TextStyle(fontWeight: FontWeight.bold)),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  
-                  if (_images.isEmpty)
-                    GestureDetector(
-                      onTap: _showImagePickerOptions,
-                      child: Container(
-                        width: double.infinity,
-                        height: 160,
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AppColors.primary.withOpacity(0.15),
-                            width: 1.5,
+                  // White header with back button + title
+                  Container(
+                    width: double.infinity,
+                    color: Colors.white,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 12, 24, 0),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                    Icons.arrow_back_ios_new_rounded,
+                                    size: 20),
+                                color: AppColors.onSurface,
+                                onPressed: () => context.pop(),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.camera_enhance_outlined,
-                                size: 44, color: AppColors.primary.withOpacity(0.6)),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Tap to capture evidence',
-                              style: TextStyle(
-                                  color: AppColors.primary, fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    SizedBox(
-                      height: 120,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _images.length + (_images.length < 5 ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index == _images.length) {
-                            return GestureDetector(
-                              onTap: _showImagePickerOptions,
-                              child: Container(
-                                width: 120,
-                                margin: const EdgeInsets.only(right: 12),
-                                decoration: BoxDecoration(
-                                  color: AppColors.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: AppColors.primary.withOpacity(0.1)),
-                                ),
-                                child: const Icon(Icons.add_a_photo_outlined, color: AppColors.primary),
-                              ),
-                            );
-                          }
-                          return Stack(
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 8, 24, 28),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                width: 120,
-                                margin: const EdgeInsets.only(right: 12),
+                                width: 36,
+                                height: 4,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  image: DecorationImage(
-                                    image: FileImage(_images[index]),
-                                    fit: BoxFit.cover,
-                                  ),
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
-                              Positioned(
-                                top: 4,
-                                right: 16,
-                                child: GestureDetector(
-                                  onTap: () => _removeImage(index),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black54,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.close, color: Colors.white, size: 14),
-                                  ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'New Report',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.onSurface,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Document an environmental issue in your city.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.outline,
+                                  height: 1.4,
                                 ),
                               ),
                             ],
-                          );
-                        },
-                      ),
-                    ),
-
-                  const SizedBox(height: 24),
-
-                  // -- DETECTED LOCATION section --
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(Icons.location_on_rounded,
-                                    color: AppColors.primary, size: 22),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const Text(
-                                          'DETECTED LOCATION',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.outline,
-                                            letterSpacing: 1,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () async {
-                                            if (_lat == null || _lng == null) return;
-                                            final result = await Navigator.push<LocationPickerResult>(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => LocationPickerPage(
-                                                  initialLocation: LatLng(_lat!, _lng!),
-                                                ),
-                                              ),
-                                            );
-                                            
-                                            if (result != null && mounted) {
-                                              setState(() {
-                                                _lat = result.coordinates.latitude;
-                                                _lng = result.coordinates.longitude;
-                                                _addressController.text = result.address;
-                                                _coordinates = 'Coordinates: ${_lat!.toStringAsFixed(4)}° N, ${_lng!.toStringAsFixed(4)}° E';
-                                              });
-                                            }
-                                          },
-                                          child: const Text(
-                                            'Edit on Map',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.primary,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 3),
-                                      TextField(
-                                        controller: _addressController,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                          color: AppColors.onSurface,
-                                        ),
-                                        decoration: const InputDecoration(
-                                          isDense: true,
-                                          contentPadding: EdgeInsets.zero,
-                                          border: InputBorder.none,
-                                        ),
-                                      ),
-                                      if (_coordinates.isNotEmpty)
-                                        Text(
-                                          _coordinates,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.onSurface.withOpacity(0.55),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        // Map preview placeholder
-                        ClipRRect(
-                          borderRadius:
-                              const BorderRadius.vertical(bottom: Radius.circular(20)),
-                          child: Container(
-                            height: 130,
-                            color: const Color(0xFFD8E8D4),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                CustomPaint(
-                                  size: Size.infinite,
-                                  painter: _MapGridPainter(),
-                                ),
-                                const Icon(Icons.location_on,
-                                    color: AppColors.primary, size: 40),
-                              ],
-                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 24),
-
-                  // -- REPORT CATEGORY section --
-                  _sectionLabel('REPORT CATEGORY'),
-                  const SizedBox(height: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: categoriesAsync.when(
-                      loading: () => const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                      error: (err, stack) => const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text('Failed to load categories', style: TextStyle(color: Colors.red)),
-                      ),
-                      data: (categories) {
-                        return DropdownButtonFormField<int>(
-                          value: _selectedCategoryId,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                          ),
-                          hint: const Text('Select Category',
-                              style: TextStyle(color: AppColors.outline)),
-                          icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                              color: AppColors.onSurface),
-                          items: categories.map<DropdownMenuItem<int>>((cat) {
-                            return DropdownMenuItem<int>(
-                              value: cat['id'] as int,
-                              child: Text(cat['name'] as String),
-                            );
-                          }).toList(),
-                          onChanged: (val) => setState(() => _selectedCategoryId = val),
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // -- ADDITIONAL DETAILS section --
-                  _sectionLabel('ADDITIONAL DETAILS'),
-                  const SizedBox(height: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: TextField(
-                      controller: _descriptionController,
-                      maxLines: 5,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.all(20),
-                        hintText: 'Describe the issue in a few words...',
-                        hintStyle: TextStyle(color: AppColors.outline, fontSize: 14),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // -- SUBMIT BUTTON --
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton.icon(
-                      onPressed: _isSubmitting ? null : _handleSubmit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // -- EVIDENCE PHOTOS section --
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                                child: _sectionLabel(
+                                    'EVIDENCE PHOTOS (${_images.length}/5)')),
+                            if (_images.length < 5)
+                              TextButton.icon(
+                                onPressed: _showImagePickerOptions,
+                                icon: const Icon(Icons.add_a_photo, size: 16),
+                                label: const Text('Add',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                          ],
                         ),
-                      ),
-                      icon: _isSubmitting 
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Icon(Icons.send_rounded, size: 20),
-                      label: Text(
-                        _isSubmitting ? 'Submitting...' : 'Submit Report',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
+                        const SizedBox(height: 10),
+
+                        if (_images.isEmpty)
+                          GestureDetector(
+                            onTap: _showImagePickerOptions,
+                            child: Container(
+                              width: double.infinity,
+                              height: 160,
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: AppColors.primary.withValues(alpha: 0.15),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.camera_enhance_outlined,
+                                      size: 44,
+                                      color: AppColors.primary
+                                          .withValues(alpha: 0.6)),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    'Tap to capture evidence',
+                                    style: TextStyle(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        else
+                          SizedBox(
+                            height: 120,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount:
+                                  _images.length + (_images.length < 5 ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index == _images.length) {
+                                  return GestureDetector(
+                                    onTap: _showImagePickerOptions,
+                                    child: Container(
+                                      width: 120,
+                                      margin: const EdgeInsets.only(right: 12),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.surfaceContainerHighest,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                            color: AppColors.surfaceContainerHigh),
+                                      ),
+                                      child: const Icon(
+                                          Icons.add_a_photo_outlined,
+                                          color: AppColors.primary),
+                                    ),
+                                  );
+                                }
+                                return Stack(
+                                  children: [
+                                    Container(
+                                      width: 120,
+                                      margin: const EdgeInsets.only(right: 12),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        image: DecorationImage(
+                                          image: FileImage(_images[index]),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 4,
+                                      right: 16,
+                                      child: GestureDetector(
+                                        onTap: () => _removeImage(index),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black54,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(Icons.close,
+                                              color: Colors.white, size: 14),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+
+                        const SizedBox(height: 24),
+
+                        // -- DETECTED LOCATION section --
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.surfaceContainerLow,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(
+                                          Icons.location_on_rounded,
+                                          color: AppColors.primary,
+                                          size: 22),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text(
+                                                'DETECTED LOCATION',
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: AppColors.outline,
+                                                  letterSpacing: 1,
+                                                ),
+                                              ),
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  if (_lat == null ||
+                                                      _lng == null) return;
+                                                  final result = await Navigator
+                                                      .push<LocationPickerResult>(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          LocationPickerPage(
+                                                        initialLocation: LatLng(
+                                                            _lat!, _lng!),
+                                                      ),
+                                                    ),
+                                                  );
+
+                                                  if (result != null &&
+                                                      mounted) {
+                                                    setState(() {
+                                                      _lat = result.coordinates
+                                                          .latitude;
+                                                      _lng = result.coordinates
+                                                          .longitude;
+                                                      _addressController.text =
+                                                          result.address;
+                                                      _coordinates =
+                                                          'Coordinates: ${_lat!.toStringAsFixed(4)}° N, ${_lng!.toStringAsFixed(4)}° E';
+                                                    });
+                                                  }
+                                                },
+                                                child: const Text(
+                                                  'Edit on Map',
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColors.primary,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 3),
+                                          TextField(
+                                            controller: _addressController,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                              color: AppColors.onSurface,
+                                            ),
+                                            decoration: const InputDecoration(
+                                              isDense: true,
+                                              contentPadding: EdgeInsets.zero,
+                                              border: InputBorder.none,
+                                            ),
+                                          ),
+                                          if (_coordinates.isNotEmpty)
+                                            Text(
+                                              _coordinates,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: AppColors.outline,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // Map preview placeholder
+                              ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                    bottom: Radius.circular(20)),
+                                child: Container(
+                                  height: 130,
+                                  color: const Color(0xFFD8E8D4),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      CustomPaint(
+                                        size: Size.infinite,
+                                        painter: _MapGridPainter(),
+                                      ),
+                                      const Icon(Icons.location_on,
+                                          color: AppColors.primary, size: 40),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // -- REPORT CATEGORY section --
+                        _sectionLabel('REPORT CATEGORY'),
+                        const SizedBox(height: 10),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: categoriesAsync.when(
+                            loading: () => const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Center(
+                                  child: CircularProgressIndicator()),
+                            ),
+                            error: (err, stack) => const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text('Failed to load categories',
+                                  style: TextStyle(color: Colors.red)),
+                            ),
+                            data: (categories) {
+                              return DropdownButtonFormField<int>(
+                                value: _selectedCategoryId,
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 16),
+                                ),
+                                hint: const Text('Select Category',
+                                    style:
+                                        TextStyle(color: AppColors.outline)),
+                                icon: const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: AppColors.onSurface),
+                                items: categories
+                                    .map<DropdownMenuItem<int>>((cat) {
+                                  return DropdownMenuItem<int>(
+                                    value: cat['id'] as int,
+                                    child: Text(cat['name'] as String),
+                                  );
+                                }).toList(),
+                                onChanged: (val) =>
+                                    setState(() => _selectedCategoryId = val),
+                              );
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // -- ADDITIONAL DETAILS section --
+                        _sectionLabel('ADDITIONAL DETAILS'),
+                        const SizedBox(height: 10),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: TextField(
+                            controller: _descriptionController,
+                            maxLines: 5,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.all(20),
+                              hintText: 'Describe the issue in a few words...',
+                              hintStyle: TextStyle(
+                                  color: AppColors.outline, fontSize: 14),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // -- SUBMIT BUTTON --
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton.icon(
+                            onPressed: _isSubmitting ? null : _handleSubmit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              disabledBackgroundColor:
+                                  AppColors.primary.withValues(alpha: 0.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            icon: _isSubmitting
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white, strokeWidth: 2))
+                                : const Icon(Icons.send_rounded, size: 20),
+                            label: Text(
+                              _isSubmitting ? 'Submitting...' : 'Submit Report',
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 40),
+                      ],
                     ),
                   ),
-
-                  const SizedBox(height: 40),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
-    ),
-    ),
     );
   }
 
@@ -633,7 +684,7 @@ class _MapGridPainter extends CustomPainter {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }
     final roadPaint = Paint()
-      ..color = Colors.white.withOpacity(0.7)
+      ..color = Colors.white.withValues(alpha: 0.7)
       ..strokeWidth = 12
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(

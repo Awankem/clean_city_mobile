@@ -32,6 +32,7 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
   late int localPriority;
   final PageController _pageController = PageController();
   int _currentImageIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -172,17 +173,17 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                           imageUrl: report.images[index],
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
-                            color: reportColor.withOpacity(0.1),
+                            color: reportColor.withValues(alpha: 0.1),
                             child: const Center(
                               child: CircularProgressIndicator(color: AppColors.primary),
                             ),
                           ),
                           errorWidget: (context, url, error) => Container(
-                            color: reportColor.withOpacity(0.2),
+                            color: reportColor.withValues(alpha: 0.2),
                             child: Icon(
                               _getCategoryIcon(),
                               size: 80,
-                              color: reportColor.withOpacity(0.4),
+                              color: reportColor.withValues(alpha: 0.4),
                             ),
                           ),
                         );
@@ -190,14 +191,14 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                     )
                   else
                     Container(
-                      color: reportColor.withOpacity(0.2),
+                      color: reportColor.withValues(alpha: 0.2),
                       child: Icon(
                         _getCategoryIcon(),
                         size: 80,
-                        color: reportColor.withOpacity(0.4),
+                        color: reportColor.withValues(alpha: 0.4),
                       ),
                     ),
-                  
+
                   const DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -247,7 +248,7 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                               shape: BoxShape.circle,
                               color: _currentImageIndex == index
                                   ? Colors.white
-                                  : Colors.white.withOpacity(0.4),
+                                  : Colors.white.withValues(alpha: 0.4),
                             ),
                           ),
                         ),
@@ -313,9 +314,9 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                           Expanded(
                             child: Text(
                               report.location,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 13,
-                                color: AppColors.onSurface.withOpacity(0.6),
+                                color: AppColors.outline,
                               ),
                             ),
                           ),
@@ -329,9 +330,9 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                           const SizedBox(width: 4),
                           Text(
                             'Reported ${_timeAgo(report.date)}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 13,
-                              color: AppColors.onSurface.withOpacity(0.5),
+                              color: AppColors.outline,
                             ),
                           ),
                         ],
@@ -360,12 +361,12 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   'PRIORITY LEVEL',
                                   style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.onSurface.withOpacity(0.45),
+                                    color: AppColors.outline,
                                     letterSpacing: 0.5,
                                   ),
                                 ),
@@ -387,14 +388,14 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.info_outline, color: AppColors.onSurface.withOpacity(0.5), size: 20),
+                              const Icon(Icons.info_outline, color: AppColors.outline, size: 20),
                               const SizedBox(width: 10),
-                              Expanded(
+                              const Expanded(
                                 child: Text(
                                   'This is your report — you cannot upvote it. Others can support it to raise priority.',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.onSurface.withOpacity(0.65),
+                                    color: AppColors.outline,
                                     height: 1.35,
                                   ),
                                 ),
@@ -417,7 +418,7 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               backgroundColor: isUpvoted
-                                  ? AppColors.statusResolved.withOpacity(0.05)
+                                  ? AppColors.statusResolved.withValues(alpha: 0.05)
                                   : Colors.transparent,
                             ),
                             icon: Icon(
@@ -452,9 +453,9 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                       const SizedBox(height: 8),
                       Text(
                         report.description,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
-                          color: AppColors.onSurface.withOpacity(0.7),
+                          color: AppColors.outline,
                           height: 1.5,
                         ),
                       ),
@@ -512,9 +513,9 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                           const SizedBox(width: 6),
                           Text(
                             report.location,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 13,
-                                color: AppColors.onSurface.withOpacity(0.6),
+                                color: AppColors.outline,
                                 fontWeight: FontWeight.w500),
                           ),
                         ],
@@ -535,14 +536,14 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 16),
                       if (report.statusHistory.isEmpty)
-                         _buildTimelineStep(
-                           title: 'Reported',
-                           body: 'Your report has been successfully registered.',
-                           time: DateFormat('MMM dd, HH:mm').format(report.date),
-                           icon: Icons.upload_file_outlined,
-                           iconColor: AppColors.statusPending,
-                           isLast: true,
-                         )
+                        _buildTimelineStep(
+                          title: 'Reported',
+                          body: 'Your report has been successfully registered.',
+                          time: DateFormat('MMM dd, HH:mm').format(report.date),
+                          icon: Icons.upload_file_outlined,
+                          iconColor: AppColors.statusPending,
+                          isLast: true,
+                        )
                       else
                         ListView.builder(
                           shrinkWrap: true,
@@ -551,7 +552,7 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                           itemBuilder: (context, index) {
                             final history = report.statusHistory[index];
                             final isLast = index == report.statusHistory.length - 1;
-                            
+
                             return _buildTimelineStep(
                               title: history.status.toUpperCase(),
                               body: history.note ?? 'No details provided.',
@@ -655,7 +656,7 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: iconColor, size: 18),
@@ -683,9 +684,9 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(body,
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 12,
-                        color: AppColors.onSurface.withOpacity(0.6),
+                        color: AppColors.outline,
                         height: 1.4)),
               ],
             ),
@@ -712,7 +713,6 @@ class _ReportDetailPageState extends ConsumerState<ReportDetailPage> {
 
   IconData _getCategoryIcon() {
     if (report.categoryIcon != null) {
-      // Map basic icon names to Material Icons (add more as needed)
       switch (report.categoryIcon) {
         case 'delete_outline': return Icons.delete_outline;
         case 'water_damage': return Icons.water_damage;
@@ -746,7 +746,7 @@ class _MapGridPainter extends CustomPainter {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }
     final road = Paint()
-      ..color = Colors.white.withOpacity(0.7)
+      ..color = Colors.white.withValues(alpha: 0.7)
       ..strokeWidth = 10
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(
@@ -758,4 +758,3 @@ class _MapGridPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter old) => false;
 }
-

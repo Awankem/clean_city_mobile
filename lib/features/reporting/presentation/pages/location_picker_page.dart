@@ -45,7 +45,8 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
 
   Future<void> _updateAddress(LatLng position) async {
     try {
-      final address = await MapboxService.reverseGeocode(position.latitude, position.longitude);
+      final address = await MapboxService.reverseGeocode(
+          position.latitude, position.longitude);
       if (mounted) {
         setState(() {
           _currentAddress = address.isNotEmpty ? address : 'Unknown Location';
@@ -63,7 +64,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
   Future<void> _searchLocation(String query) async {
     if (query.isEmpty) return;
     setState(() => _isSearching = true);
-    
+
     try {
       final result = await MapboxService.forwardGeocode(query);
       if (mounted) {
@@ -87,21 +88,9 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text(
-          'Select Location',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-      ),
       body: Stack(
         children: [
+          // Full-screen map
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
@@ -130,48 +119,90 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
             ],
           ),
 
-          // Center Pin
+          // Center pin
           const Center(
             child: Padding(
-              padding: EdgeInsets.only(bottom: 40), // Offset to point to exact center
-              child: Icon(Icons.location_on, color: AppColors.primary, size: 40),
+              padding: EdgeInsets.only(bottom: 40),
+              child:
+                  Icon(Icons.location_on, color: AppColors.primary, size: 40),
             ),
           ),
 
-          // Search Bar
+          // Floating back button + search bar row
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5))],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onSubmitted: _searchLocation,
-                  decoration: InputDecoration(
-                    hintText: 'Search address or landmark...',
-                    hintStyle: const TextStyle(color: AppColors.outline),
-                    prefixIcon: const Icon(Icons.search, color: AppColors.primary),
-                    suffixIcon: _isSearching 
-                      ? const Padding(padding: EdgeInsets.all(12), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
-                      : IconButton(
-                          icon: const Icon(Icons.clear, color: AppColors.outline),
-                          onPressed: () {
-                            _searchController.clear();
-                          },
+              child: Row(
+                children: [
+                  // Back button
+                  Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    elevation: 2,
+                    shadowColor: Colors.black12,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => context.pop(),
+                      child: const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 18,
+                          color: AppColors.onSurface,
                         ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+
+                  // Search bar
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: const [
+                          BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 4))
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onSubmitted: _searchLocation,
+                        decoration: InputDecoration(
+                          hintText: 'Search address or landmark...',
+                          hintStyle: const TextStyle(
+                              color: AppColors.outline, fontSize: 14),
+                          prefixIcon: const Icon(Icons.search,
+                              color: AppColors.primary, size: 20),
+                          suffixIcon: _isSearching
+                              ? const Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2)))
+                              : IconButton(
+                                  icon: const Icon(Icons.clear,
+                                      color: AppColors.outline, size: 18),
+                                  onPressed: () => _searchController.clear(),
+                                ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 14, horizontal: 16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
 
-          // Bottom Action Card
+          // Bottom action card
           Positioned(
             bottom: 0,
             left: 0,
@@ -181,24 +212,40 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20, offset: Offset(0, -5))],
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 20,
+                      offset: Offset(0, -5))
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('SELECTED LOCATION', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.outline, letterSpacing: 1)),
+                  const Text(
+                    'SELECTED LOCATION',
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.outline,
+                        letterSpacing: 1),
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     _currentAddress,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.onSurface),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: AppColors.onSurface),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${_currentCenter.latitude.toStringAsFixed(4)}° N, ${_currentCenter.longitude.toStringAsFixed(4)}° E',
-                    style: TextStyle(fontSize: 12, color: AppColors.onSurface.withOpacity(0.55)),
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.outline),
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
@@ -206,15 +253,19 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                     height: 56,
                     child: ElevatedButton(
                       onPressed: () {
-                        context.pop(LocationPickerResult(_currentCenter, _currentAddress));
+                        context.pop(LocationPickerResult(
+                            _currentCenter, _currentAddress));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
-                      child: const Text('Confirm Location', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text('Confirm Location',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],

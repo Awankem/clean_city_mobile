@@ -36,7 +36,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       await ref.read(authRepositoryProvider).login(email, password);
       await NotificationService.uploadFcmToken();
       if (mounted) {
-        context.go('/'); // Navigate to dashboard on success
+        context.go('/');
       }
     } catch (e) {
       if (mounted) {
@@ -50,139 +50,183 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text('CleanCity', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        elevation: 0,
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: SingleChildScrollView(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
             child: Column(
               children: [
-            // White title section below AppBar
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome Back',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                      letterSpacing: -0.56,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Sign in to continue reporting and tracking issues in your neighborhood.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.onSurface.withOpacity(0.6),
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                children: [
-                  // Email
-                  _buildInputCard(
-                    label: 'EMAIL ADDRESS',
-                    child: TextField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        prefixIcon: Icon(Icons.mail_outline, color: AppColors.primary),
-                        hintText: 'your@email.com',
-                        hintStyle: TextStyle(color: AppColors.onSurface.withOpacity(0.4)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Password
-                  _buildInputCard(
-                    label: 'PASSWORD',
-                    child: TextField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        prefixIcon: Icon(Icons.lock_outline, color: AppColors.primary),
-                        hintText: '••••••••',
-                        hintStyle: TextStyle(color: AppColors.onSurface.withOpacity(0.4)),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                            color: AppColors.outline,
-                          ),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => context.push('/forgot-password'),
-                      child: Text(
-                        'Forgot Password?',
-                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton.icon(
-                      onPressed: _isLoading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      icon: _isLoading 
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Icon(Icons.arrow_forward_rounded),
-                      label: Text(_isLoading ? 'Signing In...' : 'Sign In', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    alignment: WrapAlignment.center,
+                // Back button row
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 12, 24, 0),
+                  child: Row(
                     children: [
-                      Text("Don't have an account? ",
-                          style: TextStyle(color: AppColors.onSurface.withOpacity(0.6))),
-                      GestureDetector(
-                        onTap: () => context.push('/signup'),
-                        child: Text('Sign Up',
-                            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                        color: AppColors.onSurface,
+                        onPressed: () => context.pop(),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 40),
-                ],
-              ),
-            ),
-          ],
+                ),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+
+                        // Green accent bar
+                        Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        const Text(
+                          'Welcome\nback',
+                          style: TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.onSurface,
+                            height: 1.15,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Sign in to continue reporting and tracking issues in your neighbourhood.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.outline,
+                            height: 1.55,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+
+                        _buildField(
+                          label: 'Email address',
+                          controller: _emailController,
+                          hint: 'your@email.com',
+                          icon: Icons.mail_outline_rounded,
+                          keyboard: TextInputType.emailAddress,
+                        ),
+                        const SizedBox(height: 20),
+
+                        _buildField(
+                          label: 'Password',
+                          controller: _passwordController,
+                          hint: '••••••••',
+                          icon: Icons.lock_outline_rounded,
+                          obscure: _obscurePassword,
+                          suffix: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              size: 20,
+                              color: AppColors.outline,
+                            ),
+                            onPressed: () =>
+                                setState(() => _obscurePassword = !_obscurePassword),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => context.push('/forgot-password'),
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(0, 36),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: const Text(
+                              'Forgot password?',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              disabledBackgroundColor:
+                                  AppColors.primary.withValues(alpha: 0.4),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Sign In',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+
+                        Center(
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            children: [
+                              Text(
+                                "Don't have an account? ",
+                                style: TextStyle(
+                                  color: AppColors.outline,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => context.push('/signup'),
+                                child: const Text(
+                                  'Sign Up',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -190,26 +234,63 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  Widget _buildInputCard({required String label, required Widget child}) {
+  Widget _buildField({
+    required String label,
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool obscure = false,
+    Widget? suffix,
+    TextInputType? keyboard,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            color: AppColors.outline,
-            letterSpacing: 1.2,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.onSurface,
           ),
         ),
-        const SizedBox(height: 6),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: obscure,
+          keyboardType: keyboard,
+          style: const TextStyle(fontSize: 15, color: AppColors.onSurface),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+              color: AppColors.outline.withValues(alpha: 0.6),
+              fontSize: 15,
+            ),
+            prefixIcon: Icon(icon, size: 20, color: AppColors.outline),
+            suffixIcon: suffix,
+            filled: true,
+            fillColor: AppColors.surfaceContainerLow,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(
+                color: AppColors.surfaceContainerHigh,
+                width: 1.5,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(
+                color: AppColors.surfaceContainerHigh,
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            ),
           ),
-          child: child,
         ),
       ],
     );

@@ -21,7 +21,8 @@ class ReportHistoryPage extends ConsumerStatefulWidget {
   ConsumerState<ReportHistoryPage> createState() => _ReportHistoryPageState();
 }
 
-class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with SingleTickerProviderStateMixin {
+class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _activeFilter = 'All';
   final List<String> _filters = ['All', 'Pending', 'In Progress', 'Resolved'];
@@ -47,44 +48,49 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
       backgroundColor: AppColors.surfaceContainerLow,
       body: Column(
         children: [
+          // White header with title + tabs
           Container(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-            color: AppColors.primary,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  child: Row(
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'CleanCity Reports',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'CleanCity Reports',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: AppColors.onSurface,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      const NotificationIconButton(),
+                        const NotificationIconButton(iconColor: AppColors.onSurface),
+                      ],
+                    ),
+                  ),
+                  TabBar(
+                    controller: _tabController,
+                    indicatorColor: AppColors.primary,
+                    indicatorWeight: 3,
+                    labelColor: AppColors.primary,
+                    unselectedLabelColor: AppColors.outline,
+                    labelStyle: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 13),
+                    tabs: const [
+                      Tab(text: 'MY ACTIVITY'),
+                      Tab(text: 'CITY FEED'),
                     ],
                   ),
-                ),
-                TabBar(
-                  controller: _tabController,
-                  indicatorColor: Colors.white,
-                  indicatorWeight: 3,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.white70,
-                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                  tabs: const [
-                    Tab(text: 'MY ACTIVITY'),
-                    Tab(text: 'CITY FEED'),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Expanded(
@@ -112,8 +118,11 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
           return _buildEmptyState('You haven\'t submitted any reports yet.');
         }
 
-        final resolvedCount = reports.where((r) => r.status.toLowerCase() == 'resolved').length;
-        final inProgressCount = reports.where((r) => r.status.toLowerCase() == 'in_progress').length;
+        final resolvedCount =
+            reports.where((r) => r.status.toLowerCase() == 'resolved').length;
+        final inProgressCount = reports
+            .where((r) => r.status.toLowerCase() == 'in_progress')
+            .length;
 
         return CustomScrollView(
           slivers: [
@@ -137,16 +146,23 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                         const SizedBox(height: 4),
                         Text(
                           '${reports.length * 5} Impact Points',
-                          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 26, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            Expanded(child: _buildStatPill('${reports.length}', 'Submitted', AppColors.primary)),
+                            Expanded(
+                                child: _buildStatPill(
+                                    '${reports.length}', 'Submitted', AppColors.primary)),
                             const SizedBox(width: 8),
-                            Expanded(child: _buildStatPill('$inProgressCount', 'In Progress', AppColors.statusInProgress)),
+                            Expanded(
+                                child: _buildStatPill('$inProgressCount',
+                                    'In Progress', AppColors.statusInProgress)),
                             const SizedBox(width: 8),
-                            Expanded(child: _buildStatPill('$resolvedCount', 'Resolved', AppColors.statusResolved)),
+                            Expanded(
+                                child: _buildStatPill('$resolvedCount',
+                                    'Resolved', AppColors.statusResolved)),
                           ],
                         ),
                       ],
@@ -161,7 +177,8 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                   const Padding(
                     padding: EdgeInsets.fromLTRB(20, 12, 20, 16),
                     child: Text('My Report History',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
 
                   ListView.builder(
@@ -179,7 +196,8 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                         location: report.location,
                         images: report.images,
                         upvotes: report.upvotes,
-                        onTap: () => context.push('/report-detail/${report.id}'),
+                        onTap: () =>
+                            context.push('/report-detail/${report.id}'),
                       );
                     },
                   ),
@@ -237,11 +255,13 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                                 letterSpacing: 1.5)),
                         SizedBox(height: 4),
                         Text('Community Reports',
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold)),
                         SizedBox(height: 4),
                         Text(
                           'All community reports — support others\' issues to raise priority.',
-                          style: TextStyle(fontSize: 13, color: AppColors.outline),
+                          style: TextStyle(
+                              fontSize: 13, color: AppColors.outline),
                         ),
                       ],
                     ),
@@ -262,17 +282,25 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                           child: FilterChip(
                             label: Text('$filter ($count)'),
                             selected: isSelected,
-                            onSelected: (_) => setState(() => _activeFilter = filter),
+                            onSelected: (_) =>
+                                setState(() => _activeFilter = filter),
                             backgroundColor: Colors.white,
                             selectedColor: AppColors.primary,
                             labelStyle: TextStyle(
-                              color: isSelected ? Colors.white : AppColors.onSurface,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.onSurface,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                               fontSize: 13,
                             ),
                             side: BorderSide(
-                                color: isSelected ? AppColors.primary : const Color(0xFFBEC9C0)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : const Color(0xFFBEC9C0)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                             showCheckmark: false,
                           ),
                         );
@@ -284,7 +312,8 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
 
                   if (filteredReports.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 24),
                       child: _buildEmptyState(
                         'No ${_activeFilter.toLowerCase()} reports in the city feed.',
                       ),
@@ -302,14 +331,14 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (isOwn)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 6, left: 4),
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 6, left: 4),
                               child: Text(
                                 'Your report',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.primary.withOpacity(0.85),
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ),
@@ -321,7 +350,8 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                             location: report.location,
                             images: report.images,
                             upvotes: report.upvotes,
-                            onTap: () => context.push('/report-detail/${report.id}'),
+                            onTap: () =>
+                                context.push('/report-detail/${report.id}'),
                           ),
                         ],
                       );
@@ -342,24 +372,24 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox_outlined, size: 48, color: AppColors.outline.withOpacity(0.5)),
+          const Icon(Icons.inbox_outlined, size: 48, color: AppColors.outline),
           const SizedBox(height: 16),
-          Text(message, style: TextStyle(color: AppColors.outline.withOpacity(0.7))),
+          Text(message, style: const TextStyle(color: AppColors.outline)),
         ],
       ),
     );
   }
 
   Widget _buildLatestUpdateHighlight(ReportModel report) {
-    final latestUpdate = report.statusHistory.isNotEmpty ? report.statusHistory.first : null;
-    
+    final latestUpdate =
+        report.statusHistory.isNotEmpty ? report.statusHistory.first : null;
+
     return Container(
       margin: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: AppColors.primary.withOpacity(0.1), width: 1.5),
+        border: Border.all(color: AppColors.surfaceContainerHigh, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,10 +412,10 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                       Text(report.category,
                           style: const TextStyle(
                               fontSize: 17, fontWeight: FontWeight.bold)),
-                      Text('Report #${report.id.padLeft(4, '0')} • ${report.location}',
+                      Text(
+                          'Report #${report.id.padLeft(4, '0')} • ${report.location}',
                           style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0x80000000))),
+                              fontSize: 12, color: Color(0x80000000))),
                     ],
                   ),
                 ),
@@ -397,8 +427,11 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
             icon: Icons.notifications_none_outlined,
             iconColor: AppColors.primary,
             title: latestUpdate?.status.toUpperCase() ?? 'REPORTED',
-            time: latestUpdate != null ? _timeAgo(latestUpdate.createdAt) : 'Recently',
-            body: latestUpdate?.note ?? 'Your report is currently pending review.',
+            time: latestUpdate != null
+                ? _timeAgo(latestUpdate.createdAt)
+                : 'Recently',
+            body: latestUpdate?.note ??
+                'Your report is currently pending review.',
             isLast: true,
           ),
         ],
@@ -418,15 +451,17 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
           Text(value,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
+              style: TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold, color: color)),
           Text(label,
-              style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  fontSize: 10, color: color, fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -451,13 +486,16 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
+                  color: iconColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: iconColor, size: 18),
               ),
               if (!isLast)
-                Container(width: 2, height: 32, color: AppColors.outlineVariantSolid),
+                Container(
+                    width: 2,
+                    height: 32,
+                    color: AppColors.outlineVariantSolid),
             ],
           ),
           const SizedBox(width: 12),
@@ -472,7 +510,8 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                     children: [
                       Expanded(
                         child: Text(title,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14),
                             overflow: TextOverflow.ellipsis),
                       ),
                       Text(time,
@@ -504,8 +543,7 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: AppColors.primary.withOpacity(0.1), width: 1.5),
+        border: Border.all(color: AppColors.surfaceContainerHigh, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -520,8 +558,9 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
             itemBuilder: (context, index) {
               final history = report.statusHistory[index];
               final isLast = index == report.statusHistory.length - 1;
-              
-              final iconColor = ReportStatusUtils.badgeBackground(history.status);
+
+              final iconColor =
+                  ReportStatusUtils.badgeBackground(history.status);
               final icon = ReportStatusUtils.icon(history.status);
 
               return Row(
@@ -533,7 +572,7 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: iconColor.withOpacity(0.1),
+                          color: iconColor.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(icon, color: iconColor, size: 18),
@@ -541,7 +580,10 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                       if (!isLast)
                         Container(
                           width: 2,
-                          height: (history.changedBy != null && history.changedBy!.isNotEmpty) ? 80.0 : 50.0,
+                          height: (history.changedBy != null &&
+                                  history.changedBy!.isNotEmpty)
+                              ? 80.0
+                              : 50.0,
                           color: AppColors.outlineVariantSolid,
                         ),
                     ],
@@ -559,16 +601,19 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
                                   fontSize: 14,
                                   color: iconColor)),
                           const SizedBox(height: 2),
-                          Text(DateFormat('MMM dd, HH:mm').format(history.createdAt),
+                          Text(
+                              DateFormat('MMM dd, HH:mm')
+                                  .format(history.createdAt),
                               style: const TextStyle(
                                   fontSize: 11, color: Color(0x80000000))),
                           const SizedBox(height: 4),
                           Text(history.note ?? 'No details provided.',
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.onSurface.withOpacity(0.6),
+                                  color: AppColors.outline,
                                   height: 1.4)),
-                          if (history.changedBy != null && history.changedBy!.isNotEmpty) ...[
+                          if (history.changedBy != null &&
+                              history.changedBy!.isNotEmpty) ...[
                             const SizedBox(height: 12),
                             Text('Admin: ${history.changedBy}',
                                 style: const TextStyle(
@@ -589,4 +634,3 @@ class _ReportHistoryPageState extends ConsumerState<ReportHistoryPage> with Sing
     );
   }
 }
-

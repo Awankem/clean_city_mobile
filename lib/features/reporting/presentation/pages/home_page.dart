@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +7,6 @@ import '../../../../core/utils/report_status_utils.dart';
 import '../../../../shared/widgets/admin_stat_card.dart';
 import '../../../../shared/widgets/notification_icon_button.dart';
 import '../../../../shared/widgets/report_card.dart';
-import '../../domain/report_model.dart';
 import '../../data/report_providers.dart';
 
 class HomePage extends ConsumerWidget {
@@ -23,22 +21,24 @@ class HomePage extends ConsumerWidget {
       backgroundColor: AppColors.surfaceContainerLow,
       body: CustomScrollView(
         slivers: [
-          // Glassmorphism SliverAppBar - dark green, blurs over content
           SliverAppBar(
             expandedHeight: 60,
             floating: true,
             pinned: true,
-            backgroundColor: AppColors.primary.withOpacity(0.92),
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.transparent,
             elevation: 0,
+            scrolledUnderElevation: 0.5,
+            shadowColor: AppColors.surfaceContainerHigh,
             title: const Text(
               'CleanCity',
               style: TextStyle(
-                color: Colors.white,
+                color: AppColors.primary,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
             ),
-            actions: const [NotificationIconButton()],
+            actions: const [NotificationIconButton(iconColor: AppColors.onSurface)],
           ),
 
           SliverToBoxAdapter(
@@ -53,28 +53,24 @@ class HomePage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'YOUR DASHBOARD',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                                letterSpacing: 1,
-                              ),
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'YOUR DASHBOARD',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                            letterSpacing: 1,
                           ),
-                        ],
+                        ),
                       ),
                       const SizedBox(height: 16),
                       myReportsAsync.when(
@@ -109,7 +105,7 @@ class HomePage extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        error: (_, __) => const Text(
+                        error: (_, _) => const Text(
                           '0',
                           style: TextStyle(
                             fontSize: 56,
@@ -120,11 +116,11 @@ class HomePage extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      Text(
+                      const Text(
                         'Reports of your reports resolved.',
                         style: TextStyle(
                           fontSize: 16,
-                          color: AppColors.onSurface.withOpacity(0.65),
+                          color: AppColors.outline,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -192,7 +188,7 @@ class HomePage extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, _) => const SizedBox.shrink(),
                   ),
                 ),
 
@@ -284,9 +280,9 @@ class HomePage extends ConsumerWidget {
                 const SizedBox(height: 28),
 
                 // High Priority Issues
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: const Text(
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
                     'High Priority Issues',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
@@ -295,8 +291,7 @@ class HomePage extends ConsumerWidget {
 
                 cityReportsAsync.when(
                   data: (reports) {
-                    final highPriorityReports =
-                        reports
+                    final highPriorityReports = reports
                             .where((r) => r.status.toLowerCase() != 'resolved')
                             .toList()
                           ..sort(
@@ -340,7 +335,7 @@ class HomePage extends ConsumerWidget {
                           child: _buildHotspot(
                             context,
                             icon: _getCategoryIcon(report.categoryIcon),
-                            iconBg: badgeColor.withOpacity(0.12),
+                            iconBg: badgeColor.withValues(alpha: 0.12),
                             iconColor: badgeTextColor == Colors.white
                                 ? badgeColor
                                 : badgeTextColor,
@@ -363,7 +358,7 @@ class HomePage extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                 ),
 
                 const SizedBox(height: 100),
@@ -433,9 +428,9 @@ class HomePage extends ConsumerWidget {
                 ),
                 Text(
                   subtitle,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: AppColors.onSurface.withOpacity(0.55),
+                    color: AppColors.outline,
                   ),
                 ),
               ],

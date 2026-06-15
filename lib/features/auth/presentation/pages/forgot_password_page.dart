@@ -15,148 +15,205 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text('CleanCity', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // White header
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Lock icon
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(Icons.lock_reset_rounded, color: Colors.white, size: 28),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Column(
+              children: [
+                // Back button row
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 12, 24, 0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                        color: AppColors.onSurface,
+                        onPressed: () => context.pop(),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Civic Clarity',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 1),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Protecting your digital access',
-                    style: TextStyle(fontSize: 13, color: AppColors.onSurface.withOpacity(0.5)),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Forgot password?',
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: -0.5),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Enter the email address associated with your account and we will send a secure link to reset your password.',
-                    style: TextStyle(fontSize: 14, color: AppColors.onSurface.withOpacity(0.6), height: 1.5),
-                  ),
-                ],
-              ),
-            ),
+                ),
 
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'EMAIL ADDRESS',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.outline,
-                      letterSpacing: 1.2,
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+
+                        // Icon
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(
+                            Icons.lock_reset_rounded,
+                            color: AppColors.primary,
+                            size: 26,
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+
+                        // Green accent bar
+                        Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        const Text(
+                          'Reset your\npassword',
+                          style: TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.onSurface,
+                            height: 1.15,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Enter the email address linked to your account and we\'ll send you a secure reset link.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.outline,
+                            height: 1.55,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+
+                        // Email field label
+                        const Text(
+                          'Email address',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: AppColors.onSurface,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'your@email.com',
+                            hintStyle: TextStyle(
+                              color: AppColors.outline.withValues(alpha: 0.6),
+                              fontSize: 15,
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.mail_outline_rounded,
+                              size: 20,
+                              color: AppColors.outline,
+                            ),
+                            filled: true,
+                            fillColor: AppColors.surfaceContainerLow,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: AppColors.surfaceContainerHigh,
+                                width: 1.5,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: AppColors.surfaceContainerHigh,
+                                width: 1.5,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 36),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Reset link sent to your email.')),
+                              );
+                              context.pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text(
+                              'Send Reset Link',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        Center(
+                          child: GestureDetector(
+                            onTap: () => context.pop(),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.arrow_back_ios_new_rounded,
+                                  size: 13,
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'Back to Sign In',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: TextField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        prefixIcon: Icon(Icons.mail_outline, color: AppColors.primary),
-                        hintText: 'your@email.cm',
-                        hintStyle: TextStyle(color: AppColors.onSurface.withOpacity(0.4)),
-                        suffixIcon: Icon(Icons.mail_outline, color: AppColors.outline),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Reset link sent to your email.')),
-                        );
-                        context.pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      icon: const Icon(Icons.arrow_forward_rounded),
-                      label: const Text('Send Reset Link',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: GestureDetector(
-                      onTap: () => context.pop(),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.arrow_back, size: 16, color: AppColors.primary),
-                          const SizedBox(width: 6),
-                          Text('Back to Login',
-                              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Center(
-                    child: Text(
-                      'Secure  •  Private  •  Civic',
-                      style: TextStyle(color: AppColors.onSurface.withOpacity(0.35), fontSize: 12),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Center(
-                    child: Text(
-                      '© 2024 Bamenda Municipal Digital Services',
-                      style: TextStyle(color: AppColors.onSurface.withOpacity(0.3), fontSize: 11),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
